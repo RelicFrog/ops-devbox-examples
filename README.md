@@ -1,118 +1,161 @@
-# DevBox Examples
+# ops-devbox-examples
 
-Reference workspace collection demonstrating reproducible developer environments
-using [Devbox](https://www.jetify.com/devbox) for multiple language ecosystems.
-Each workspace is self-contained and targets macOS ARM Silicon (aarch64-darwin)
-as the primary development platform.
+[![CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
+[![Devbox](https://img.shields.io/badge/devbox-ready-5C5CFF?logo=nixos&logoColor=white)](https://www.jetify.com/devbox)
+[![Platform](https://img.shields.io/badge/platform-macOS%20ARM64-lightgrey?logo=apple)](https://developer.apple.com/silicon/)
 
-## Overview
+Reference workspace collection demonstrating reproducible, hermetic developer
+environments using [Devbox](https://www.jetify.com/devbox) across multiple
+language ecosystems. Each workspace is fully self-contained with its own
+toolchain, build system, CI pipeline, and example application.
 
-This repository is structured as a multi-workspace monorepo. Each subdirectory
-is an independent Devbox workspace with its own toolchain, Makefile, CI pipeline,
-and example application.
+**Primary target platform:** macOS Apple Silicon (`aarch64-darwin`).
+
+---
 
 ## Workspaces
 
-| Directory               | Language  | Application                               | Status  |
-|-------------------------|-----------|-------------------------------------------|---------|
-| [`ws-rust`](./ws-rust/) | Rust 2024 | `primes-cli` — prime number generator CLI | active  |
-| `ws-go` _(coming)_      | Go        | TBD                                       | planned |
-| `ws-node` _(coming)_    | Node.js   | TBD                                       | planned |
+| Workspace | Language | Application | CI | Status |
+|-----------|----------|-------------|-----|--------|
+| [`ws-rust`](./ws-rust/) | Rust 2024 | [`primes-cli`](./ws-rust/src/main.rs) — prime number generator | [![ws-rust CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-rust.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-rust.yml) | active |
+| `ws-go` | Go | TBD | — | planned |
+| `ws-node` | Node.js | TBD | — | planned |
 
-## Prerequisites
+---
 
-- [Devbox](https://www.jetify.com/devbox/docs/installing_devbox/) >= 0.13
-- [Nix](https://nixos.org/download) (installed automatically by Devbox)
-- macOS with Apple Silicon (primary target platform)
+## Getting started
 
-## Quick Start
+### Prerequisites
+
+| Tool | Version | Install |
+|------|---------|---------|
+| [Devbox](https://www.jetify.com/devbox) | >= 0.13 | `curl -fsSL https://get.jetify.com/devbox \| bash` |
+| [Nix](https://nixos.org/download) | any | installed automatically by Devbox |
+| macOS + Apple Silicon | — | primary development platform |
+
+### Quick start
 
 ```bash
-# Enter a workspace
-cd ws-rust
+# Clone the repository
+git clone https://github.com/RelicFrog/ops-devbox-examples.git
+cd ops-devbox-examples
 
-# Start the Devbox shell (installs all tools on first run)
+# Enter a workspace — Devbox installs all tooling on first run
+cd ws-rust
 devbox shell
 
-# Or run a command directly without entering the shell
-devbox run build
-devbox run test
-devbox run lint
+# Run tasks directly without entering the shell
+devbox run build    # cargo build --release
+devbox run test     # cargo nextest run --all
+devbox run check    # fmt-check + clippy + tests
+devbox run lint     # cargo clippy -D warnings
+devbox run clean    # cargo clean
 ```
 
-## Workspace Conventions
+---
 
-Each workspace follows a consistent structure:
+## Repository structure
 
 ```
-ws-<lang>/
-  devbox.json              # Devbox environment definition (pinned nixpkgs)
-  devbox.lock              # Locked package resolution
-  Makefile                 # Build targets (via gnumake from Nix, not system make)
-  rust-toolchain.toml      # (Rust only) toolchain pin
-  scripts/
-    devbox/
-      lib/common.sh        # Shared shell library (color, OS detection, helpers)
-      dbx_init.sh          # Devbox init_hook: preflight checks + status matrix
-      init/
-        os_darwin/override.sh
-        os_linux/override.sh
-  src/                     # Application source
-  tests/                   # Integration tests
-  .github/
-    workflows/
-      ci.yml               # Sub-workflow: lint + test for this workspace
+ops-devbox-examples/
+├── .github/
+│   └── workflows/
+│       ├── ci.yml              # Root pipeline — delegates to workspace sub-workflows
+│       └── ci-ws-rust.yml      # Reusable workflow: ws-rust lint + test
+├── ws-rust/                    # Rust 2024 workspace (active)
+│   ├── devbox.json             # Pinned Nix packages, devbox run scripts
+│   ├── Makefile                # Build targets via gnumake (Nix, not system make)
+│   ├── rust-toolchain.toml     # Stable toolchain, aarch64-apple-darwin
+│   ├── src/                    # primes-cli source
+│   ├── tests/                  # Integration tests
+│   └── scripts/devbox/         # Init hook, preflight checks, OS overrides
+├── ws-go/                      # Go workspace (planned)
+├── ws-node/                    # Node.js workspace (planned)
+├── LICENSE                     # Apache-2.0
+└── README.md
 ```
 
-### Devbox run scripts
+---
 
-All `devbox run` targets that correspond to Makefile targets delegate directly
-to `make <target>`, so both invocation styles are equivalent:
+## Workspace conventions
+
+### devbox run ↔ make
+
+All `devbox run` targets that correspond to a Makefile target delegate directly
+to `make <target>`. Both invocation styles are equivalent:
 
 ```bash
 devbox run build   # == make build
-devbox run test    # == make test
-devbox run lint    # == make lint
 devbox run check   # == make check
+devbox run fmt     # == make fmt
+devbox run lint    # == make lint
+devbox run test    # == make test
+devbox run audit   # == make audit
 devbox run clean   # == make clean
 ```
 
-Additional targets not backed by Makefile (direct devbox scripts) are also
-available per workspace. See the individual workspace README or `devbox.json`
-for the full list.
+Targets without a Makefile equivalent (e.g. `run`, `info`) are devbox-only
+scripts defined directly in `devbox.json`.
 
-### Platform notes
+### Platform package exclusions
 
-The devbox configurations target `aarch64-darwin` (Apple Silicon Mac) as the
-primary development platform. The CI pipelines run on `ubuntu-latest` (aarch64
-runners where available) and `macos-latest`. Packages that are unavailable on
-macOS are excluded via the `platforms` field in `devbox.json`.
+Packages unavailable on macOS are excluded via the `platforms` field in
+`devbox.json`. Example: `mold` (Linux-only fast linker) is listed with
+`"platforms": ["x86_64-linux", "aarch64-linux"]` so it is never installed
+on Darwin.
 
-## CI Pipeline
+### Devbox init hook
 
-The root workflow (`.github/workflows/ci.yml`) calls each workspace sub-workflow
-as a reusable job. Adding a new workspace only requires registering its workflow
-file in the root pipeline.
+Each workspace runs `scripts/devbox/dbx_init.sh` on `devbox shell` entry.
+The script performs preflight checks and renders a status matrix covering all
+toolchain components, build tools, and security utilities. OS-specific
+environment adjustments (linker flags, compiler cache) are loaded from
+`scripts/devbox/init/os_<platform>/override.sh`.
+
+---
+
+## CI pipeline
+
+The root workflow (`.github/workflows/ci.yml`) calls each workspace's
+sub-workflow as a reusable job. Matrix: `ubuntu-latest` + `macos-latest`.
 
 ```
-.github/workflows/
-  ci.yml              # Root pipeline — calls sub-workflows
-ws-rust/.github/
-  workflows/
-    ci.yml            # Rust workspace: fmt + clippy + test
+Push / PR to main
+  └── CI (ci.yml)
+        └── ws-rust (ci-ws-rust.yml)
+              ├── lint  — cargo fmt --check + cargo clippy -D warnings
+              └── test  — cargo build + cargo nextest run --all
 ```
 
-## Reference Links
+Adding a new workspace requires only registering its reusable workflow in
+`ci.yml`. No changes to existing workflows needed.
 
-| Resource               | URL                                                 |
-|------------------------|-----------------------------------------------------|
-| Devbox documentation   | https://www.jetify.com/devbox/docs/                 |
-| Devbox package search  | https://www.jetify.com/devbox/docs/devbox_packages/ |
-| Nixpkgs package search | https://search.nixos.org/packages                   |
-| ws-rust workspace      | ./ws-rust/                                          |
+---
+
+## Reference links
+
+| Resource | URL |
+|----------|-----|
+| Devbox documentation | <https://www.jetify.com/devbox/docs/> |
+| Devbox package search | <https://www.jetify.com/devbox/docs/devbox_packages/> |
+| Nixpkgs package search | <https://search.nixos.org/packages> |
+| ws-rust workspace | [./ws-rust/](./ws-rust/) |
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines. All contributions
+must pass `make check` in the relevant workspace before submitting a PR.
+
+## Security
+
+See [SECURITY.md](./SECURITY.md) for the vulnerability reporting process.
 
 ## License
 
-Copyright 2026 TEAM RelicFrog. Licensed under the [Apache License, Version 2.0](./LICENSE).
+Copyright 2026 TEAM RelicFrog.
+Licensed under the [Apache License, Version 2.0](./LICENSE).
 
-Author: Patrick Paechnatz <patrick@relicfrog.rocks>
+**Author:** Patrick Paechnatz &lt;patrick@relicfrog.rocks&gt;
