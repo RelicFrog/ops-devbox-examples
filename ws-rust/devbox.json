@@ -1,0 +1,71 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.14.2/.schema/devbox.schema.json",
+  "env": {
+    "RUST_BACKTRACE": "1",
+    "CARGO_TERM_COLOR": "always",
+    "CARGO_INCREMENTAL": "0",
+    "C_DBX_META_TEAM": "RelicFrog",
+    "C_DBX_META_PROJECT_ID": "ops-devbox-examples/ws-rust",
+    "C_DBX_META_VERSION": "1"
+  },
+  "shell": {
+    "init_hook": [
+      "scripts/devbox/dbx_init.sh"
+    ],
+    "scripts": {
+      "build": [
+        "make build"
+      ],
+      "check": [
+        "make check"
+      ],
+      "fmt": [
+        "make fmt"
+      ],
+      "lint": [
+        "make lint"
+      ],
+      "test": [
+        "make test"
+      ],
+      "audit": [
+        "make audit"
+      ],
+      "clean": [
+        "make clean"
+      ],
+      "run": [
+        "cargo run -- \"$@\""
+      ],
+      "info": [
+        "echo '--- ws-rust devbox workspace ---'",
+        "echo \"Rust: $(rustc --version 2>/dev/null || echo 'not available')\"",
+        "echo \"Cargo: $(cargo --version 2>/dev/null || echo 'not available')\"",
+        "echo \"Make: $(make --version 2>/dev/null | head -1 || echo 'not available')\"",
+        "echo \"Git: $(git --version)\"",
+        "echo \"Platform: $(uname -ms)\""
+      ]
+    }
+  },
+  "packages": {
+    "git": "latest",
+    "gh": "2.52.0",
+    "jq": "latest",
+    "curl": "latest",
+    "ripgrep": "14.1.0",
+    "fd": "latest",
+    "bat": "0.24.0",
+    "gitleaks": "latest",
+    "gnumake": "latest",
+    "rustup": "latest",
+    "cargo-nextest": "latest",
+    "cargo-audit": "latest",
+    "cargo-deny": "latest",
+    "rust-analyzer": "latest",
+    "grcov": "latest",
+    "mold": {
+      "version": "latest",
+      "platforms": ["x86_64-linux", "aarch64-linux"]
+    }
+  }
+}
