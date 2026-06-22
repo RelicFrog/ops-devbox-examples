@@ -17,7 +17,11 @@ fn nth_prime_consistent_with_sieve_first_50() {
     let sieve = sieve_of_eratosthenes(230).unwrap(); // 230 > 50th prime (229)
     for (i, &expected) in sieve.iter().enumerate() {
         let idx = (i + 1) as u64;
-        assert_eq!(nth_prime(idx).unwrap(), expected, "nth_prime({idx}) should be {expected}");
+        assert_eq!(
+            nth_prime(idx).unwrap(),
+            expected,
+            "nth_prime({idx}) should be {expected}"
+        );
     }
 }
 
@@ -43,7 +47,11 @@ fn is_prime_consistent_with_sieve_up_to_200() {
         sieve_of_eratosthenes(200).unwrap().into_iter().collect();
 
     for n in 0u64..=200 {
-        assert_eq!(is_prime(n), sieve_set.contains(&n), "is_prime({n}) disagrees with sieve");
+        assert_eq!(
+            is_prime(n),
+            sieve_set.contains(&n),
+            "is_prime({n}) disagrees with sieve"
+        );
     }
 }
 
