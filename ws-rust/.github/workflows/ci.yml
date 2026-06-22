@@ -1,0 +1,98 @@
+# Copyright 2026 TEAM RelicFrog
+# SPDX-License-Identifier: Apache-2.0
+#
+# ws-rust/.github/workflows/ci.yml
+#
+# Reusable sub-workflow for the ws-rust workspace.
+# Called by the root CI pipeline (.github/workflows/ci.yml).
+#
+# Steps:
+#   1. Format check  — cargo fmt --all -- --check
+#   2. Clippy        — cargo clippy --all -- -D warnings
+#   3. Build         — cargo build --all
+#   4. Test          — cargo nextest run --all (with cargo test fallback)
+
+name: ws-rust CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ws-rust/**"
+      - ".github/workflows/ci.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "ws-rust/**"
+      - ".github/workflows/ci.yml"
+  workflow_call:
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  RUSTFLAGS: "-D warnings"
+
+defaults:
+  run:
+    working-directory: ws-rust
+
+jobs:
+  lint:
+    name: Lint (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache Rust artefacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ws-rust
+
+      - name: Format check
+        run: cargo fmt --all -- --check
+
+      - name: Clippy
+        run: cargo clippy --all -- -D warnings
+
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-nextest
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-nextest
+
+      - name: Cache Rust artefacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ws-rust
+
+      - name: Build
+        run: cargo build --all
+
+      - name: Test (nextest)
+        run: cargo nextest run --all
