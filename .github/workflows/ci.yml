@@ -19,11 +19,11 @@ jobs:
     name: ws-rust
     uses: ./.github/workflows/ci-ws-rust.yml
 
-  # Placeholder jobs for upcoming workspaces (uncomment when ready):
-  #
-  # ws-go:
-  #   name: ws-go
-  #   uses: ./.github/workflows/ci-ws-go.yml
+  ws-go:
+    name: ws-go
+    uses: ./.github/workflows/ci-ws-go.yml
+
+  # Placeholder for upcoming workspace (uncomment when ready):
   #
   # ws-node:
   #   name: ws-node

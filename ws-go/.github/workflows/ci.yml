@@ -1,0 +1,90 @@
+# Copyright 2026 TEAM RelicFrog
+# SPDX-License-Identifier: Apache-2.0
+#
+# ws-go/.github/workflows/ci.yml
+#
+# Workspace sub-workflow for ws-go.
+# Called by the root CI pipeline via workflow_call.
+#
+# Jobs:
+#   lint — gofumpt check + golangci-lint
+#   test — go build + go test -race (needs: lint)
+
+name: ws-go CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ws-go/**"
+      - ".github/workflows/ci.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "ws-go/**"
+      - ".github/workflows/ci.yml"
+  workflow_call:
+
+env:
+  CGO_ENABLED: "0"
+  GOVERSION: "1.22.5"
+
+defaults:
+  run:
+    working-directory: ws-go
+
+jobs:
+  lint:
+    name: Lint (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GOVERSION }}
+          cache-dependency-path: ws-go/go.mod
+
+      - name: Install gofumpt
+        run: go install mvdan.cc/gofumpt@v0.6.0
+
+      - name: Format check (gofumpt)
+        run: test -z "$(gofumpt -l ./src)"
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.59.1
+          working-directory: ws-go
+
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GOVERSION }}
+          cache-dependency-path: ws-go/go.mod
+
+      - name: Build
+        run: go build -trimpath -o bin/primes-cli ./src/cmd/...
+
+      - name: Test (race detector)
+        run: go test -race -count=1 ./src/... ./tests/...
