@@ -82,9 +82,7 @@ pub fn sieve_of_eratosthenes(limit: u64) -> Result<Vec<u64>, PrimeError> {
         i += 1;
     }
 
-    Ok((2..=limit)
-        .filter(|&n| !composite[n as usize])
-        .collect())
+    Ok((2..=limit).filter(|&n| !composite[n as usize]).collect())
 }
 
 /// Returns all prime numbers in the closed interval `[start, end]`.
