@@ -199,18 +199,12 @@ mod tests {
 
     #[test]
     fn sieve_limit_ten() {
-        assert_eq!(
-            sieve_of_eratosthenes(10).unwrap(),
-            vec![2, 3, 5, 7]
-        );
+        assert_eq!(sieve_of_eratosthenes(10).unwrap(), vec![2, 3, 5, 7]);
     }
 
     #[test]
     fn sieve_limit_thirty() {
-        assert_eq!(
-            sieve_of_eratosthenes(30).unwrap(),
-            vec![2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
-        );
+        assert_eq!(sieve_of_eratosthenes(30).unwrap(), vec![2, 3, 5, 7, 11, 13, 17, 19, 23, 29]);
     }
 
     #[test]
@@ -228,10 +222,7 @@ mod tests {
 
     #[test]
     fn primes_in_range_invalid_range() {
-        assert_eq!(
-            primes_in_range(10, 5),
-            Err(PrimeError::InvalidRange { start: 10, end: 5 })
-        );
+        assert_eq!(primes_in_range(10, 5), Err(PrimeError::InvalidRange { start: 10, end: 5 }));
     }
 
     #[test]
@@ -246,10 +237,7 @@ mod tests {
 
     #[test]
     fn primes_in_range_ten_to_twenty() {
-        assert_eq!(
-            primes_in_range(10, 20).unwrap(),
-            vec![11, 13, 17, 19]
-        );
+        assert_eq!(primes_in_range(10, 20).unwrap(), vec![11, 13, 17, 19]);
     }
 
     #[test]
