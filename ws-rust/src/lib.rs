@@ -8,10 +8,4 @@
 
 pub mod primes;
 
-pub use primes::{
-    is_prime,
-    nth_prime,
-    primes_in_range,
-    sieve_of_eratosthenes,
-    PrimeError,
-};
+pub use primes::{PrimeError, is_prime, nth_prime, primes_in_range, sieve_of_eratosthenes};
