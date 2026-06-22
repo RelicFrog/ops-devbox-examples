@@ -212,8 +212,8 @@ mod tests {
 
     #[test]
     fn sieve_count_primes_below_100() {
-        // There are 25 primes below 100.
-        assert_eq!(sieve_of_eratosthenes(99).unwrap().len(), 24);
+        // There are 25 primes <= 99 (i.e. below 100): 2..97.
+        assert_eq!(sieve_of_eratosthenes(99).unwrap().len(), 25);
     }
 
     #[test]
