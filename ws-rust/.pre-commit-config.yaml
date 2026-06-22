@@ -1,0 +1,83 @@
+# Copyright 2026 TEAM RelicFrog
+# SPDX-License-Identifier: Apache-2.0
+#
+# ws-rust/.pre-commit-config.yaml
+#
+# Pre-commit hook configuration for the ws-rust workspace.
+#
+# All Rust-specific hooks are defined as 'local' hooks that invoke cargo
+# directly. This ensures they always use the exact toolchain pinned in
+# rust-toolchain.toml rather than depending on an external hook repository
+# that may lag behind the active toolchain.
+#
+# Install once inside the devbox shell:
+#   pre-commit install
+#   pre-commit install --hook-type commit-msg   # optional: enforce commit format
+#
+# Run manually against all files:
+#   pre-commit run --all-files
+#
+# The devbox init_hook installs the hooks automatically on 'devbox shell'.
+
+default_install_hook_types:
+  - pre-commit
+
+default_stages:
+  - pre-commit
+
+fail_fast: false
+
+repos:
+  # ---------------------------------------------------------------------------
+  # Generic file hygiene (pre-commit/pre-commit-hooks)
+  # ---------------------------------------------------------------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        name: trim trailing whitespace
+      - id: end-of-file-fixer
+        name: fix end of file
+      - id: check-yaml
+        name: check yaml syntax
+      - id: check-toml
+        name: check toml syntax
+      - id: check-merge-conflict
+        name: check for merge conflicts
+      - id: mixed-line-ending
+        args: [--fix=lf]
+        name: enforce LF line endings
+
+  # ---------------------------------------------------------------------------
+  # Rust — local hooks (toolchain from rust-toolchain.toml)
+  # ---------------------------------------------------------------------------
+  - repo: local
+    hooks:
+      # --- Format check -------------------------------------------------------
+      # Fast: only parses, does not compile. Fails if any file needs reformatting.
+      - id: rust-fmt
+        name: cargo fmt (check)
+        language: system
+        entry: cargo fmt --all -- --check
+        types: [rust]
+        pass_filenames: false
+
+      # --- Type check ---------------------------------------------------------
+      # Faster than a full build: resolves types and borrow checks without
+      # producing a binary. Catches compile errors before clippy runs.
+      - id: rust-check
+        name: cargo check
+        language: system
+        entry: cargo check --all
+        types: [rust]
+        pass_filenames: false
+
+      # --- Lint ---------------------------------------------------------------
+      # Runs after cargo check. -D warnings promotes every clippy warning to
+      # an error, consistent with CI (RUSTFLAGS=-D warnings).
+      - id: rust-clippy
+        name: cargo clippy
+        language: system
+        entry: cargo clippy --all -- -D warnings
+        types: [rust]
+        pass_filenames: false

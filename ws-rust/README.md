@@ -24,6 +24,7 @@ package configuration, and a full CI pipeline.
 - [Project structure](#project-structure)
 - [Development tasks](#development-tasks)
 - [Devbox environment](#devbox-environment)
+- [Pre-commit hooks](#pre-commit-hooks)
 - [CI pipeline](#ci-pipeline)
 - [License](#license)
 
@@ -144,6 +145,7 @@ Additional devbox-only targets (no Makefile equivalent):
 |--------|-------------|
 | `devbox run run` | `cargo run -- <args>` — run the binary with arguments |
 | `devbox run info` | Print workspace tool versions |
+| `devbox run docs` | Render `README.md` in the terminal via `glow --pager` |
 
 ---
 
@@ -199,6 +201,68 @@ devbox run clean    # make clean  — cargo clean
 devbox run run      # cargo run -- <args>   (no make equivalent)
 devbox run info     # print workspace tool versions (no make equivalent)
 ```
+
+---
+
+## Pre-commit hooks
+
+Pre-commit hooks run automatically before every `git commit` and enforce the
+same quality gate as CI — catching formatting and lint issues locally before
+they reach the pipeline.
+
+### Setup
+
+The `devbox shell` init hook installs the hooks automatically:
+
+```bash
+devbox shell   # runs: pre-commit install --install-hooks
+```
+
+To install manually or to re-install after updating the config:
+
+```bash
+pre-commit install          # install the pre-commit hook
+pre-commit install --install-hooks  # also download hook environments
+```
+
+### Hooks
+
+| Hook | Tool | What it checks |
+|------|------|----------------|
+| `trailing-whitespace` | pre-commit/pre-commit-hooks | No trailing whitespace |
+| `end-of-file-fixer` | pre-commit/pre-commit-hooks | Files end with a newline |
+| `check-yaml` | pre-commit/pre-commit-hooks | Valid YAML syntax |
+| `check-toml` | pre-commit/pre-commit-hooks | Valid TOML syntax (`Cargo.toml`) |
+| `check-merge-conflict` | pre-commit/pre-commit-hooks | No unresolved merge markers |
+| `mixed-line-ending` | pre-commit/pre-commit-hooks | LF line endings enforced |
+| `rust-fmt` | `cargo fmt` | Code is formatted per `rustfmt` rules |
+| `rust-check` | `cargo check` | Code compiles (type + borrow check) |
+| `rust-clippy` | `cargo clippy` | No clippy warnings (`-D warnings`) |
+
+All Rust hooks are defined as `local` entries in `.pre-commit-config.yaml` —
+they invoke `cargo` directly and always use the toolchain pinned in
+`rust-toolchain.toml`. No external hook repository is required.
+
+### Manual run
+
+```bash
+# Run all hooks against all files (useful after adding the config)
+pre-commit run --all-files
+
+# Run a single hook
+pre-commit run rust-clippy --all-files
+pre-commit run rust-fmt --all-files
+```
+
+### Skipping hooks
+
+In exceptional cases (e.g. a WIP commit) hooks can be bypassed:
+
+```bash
+git commit --no-verify -m "wip: ..."
+```
+
+This should not be used to bypass failing checks on commits intended for `main`.
 
 ---
 
