@@ -6,32 +6,34 @@
 # All targets use the gnumake binary provided by Nix (devbox package: gnumake).
 # Do NOT rely on the system make (/usr/bin/make on macOS).
 #
-# Usage inside devbox shell:
-#   make build    — release build
-#   make check    — full quality gate (fmt + clippy + nextest)
-#   make fmt      — auto-format all source files
-#   make lint     — clippy with deny-warnings
-#   make test     — run all tests via cargo-nextest
-#   make audit    — dependency security audit (cargo-audit + cargo-deny)
-#   make clean    — remove build artefacts
-#
-# Alternatively via devbox run:
-#   devbox run build / check / fmt / lint / test / audit / clean
+# Targets are documented with trailing ## comments and appear in `make help`.
 
-.PHONY: build check fmt lint test audit clean
+.DEFAULT_GOAL := help
+
+.PHONY: help build check fmt lint test audit clean
+
+# ---------------------------------------------------------------------------
+# Help — auto-generated from ## comments on each target
+# ---------------------------------------------------------------------------
+
+help: ## Show this help message
+	@printf '\nUsage: make <target>\n\n'
+	@printf 'Targets:\n'
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / { printf "  %-12s %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
+	@printf '\nAll targets are also available via: devbox run <target>\n\n'
 
 # ---------------------------------------------------------------------------
 # Build
 # ---------------------------------------------------------------------------
 
-build:
+build: ## cargo build --release
 	cargo build --release
 
 # ---------------------------------------------------------------------------
 # Quality gate (run all checks in sequence — fail fast)
 # ---------------------------------------------------------------------------
 
-check:
+check: ## fmt-check + clippy + nextest (full quality gate)
 	cargo fmt --all -- --check
 	cargo clippy --all -- -D warnings
 	cargo nextest run --all
@@ -40,28 +42,28 @@ check:
 # Formatting
 # ---------------------------------------------------------------------------
 
-fmt:
+fmt: ## cargo fmt --all (auto-format all source files)
 	cargo fmt --all
 
 # ---------------------------------------------------------------------------
 # Linting
 # ---------------------------------------------------------------------------
 
-lint:
+lint: ## cargo clippy --all -D warnings
 	cargo clippy --all -- -D warnings
 
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
 
-test:
+test: ## cargo nextest run --all
 	cargo nextest run --all
 
 # ---------------------------------------------------------------------------
 # Security audit
 # ---------------------------------------------------------------------------
 
-audit:
+audit: ## cargo audit + cargo deny check
 	cargo audit
 	cargo deny check
 
@@ -69,5 +71,5 @@ audit:
 # Cleanup
 # ---------------------------------------------------------------------------
 
-clean:
+clean: ## cargo clean (remove build artefacts)
 	cargo clean
