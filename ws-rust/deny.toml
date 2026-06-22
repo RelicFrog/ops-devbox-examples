@@ -1,0 +1,52 @@
+# Copyright 2026 TEAM RelicFrog
+# SPDX-License-Identifier: Apache-2.0
+#
+# ws-rust/deny.toml — cargo-deny policy configuration
+#
+# Reference: https://embarkstudios.github.io/cargo-deny/
+
+# ---------------------------------------------------------------------------
+# Licenses
+# ---------------------------------------------------------------------------
+# Allow the standard open-source license set present in the dependency tree.
+# Run 'cargo deny list' to audit the current license inventory.
+
+[licenses]
+# Confidence threshold for license text matching (0.0 – 1.0)
+confidence-threshold = 0.9
+
+allow = [
+    "Apache-2.0",
+    "MIT",
+    "Unicode-3.0",
+]
+
+# ---------------------------------------------------------------------------
+# Bans
+# ---------------------------------------------------------------------------
+# Flag duplicate versions and deny known-problematic crates.
+
+[bans]
+# Warn on multiple versions of the same crate; deny exact duplicates.
+multiple-versions = "warn"
+wildcards         = "allow"
+highlight         = "all"
+
+# ---------------------------------------------------------------------------
+# Advisories
+# ---------------------------------------------------------------------------
+# Mirror of cargo-audit: check against the RustSec advisory database.
+
+[advisories]
+# Ignore advisories that have been triaged and accepted.
+ignore = []
+
+# ---------------------------------------------------------------------------
+# Sources
+# ---------------------------------------------------------------------------
+# Only allow dependencies from crates.io.
+
+[sources]
+unknown-registry = "deny"
+unknown-git      = "deny"
+allow-registry   = ["https://github.com/rust-lang/crates.io-index"]
