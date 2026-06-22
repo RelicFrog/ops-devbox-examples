@@ -111,20 +111,33 @@ check_rust_toolchain() {
   else
     _record "cargo" warn "toolchain not yet active — will install on first 'cargo build'"
   fi
+
+  # rustfmt and rust-analyzer are toolchain components declared in
+  # rust-toolchain.toml — they are installed by rustup alongside rustc/cargo,
+  # not as separate Nix packages.
+  if dbx_has rustfmt; then
+    _record "rustfmt" ok "$(_version_of rustfmt --version)"
+  else
+    _record "rustfmt" warn "toolchain component not yet active"
+  fi
+
+  if dbx_has rust-analyzer; then
+    _record "rust-analyzer" ok "$(command -v rust-analyzer)"
+  else
+    _record "rust-analyzer" warn "toolchain component not yet active"
+  fi
 }
 
 check_cargo_tools() {
+  # These are standalone Nix packages in devbox.json — not toolchain components.
   # cargo-nextest   → binary: cargo-nextest
   # cargo-audit     → binary: cargo-audit
   # cargo-deny      → binary: cargo-deny
   # grcov           → binary: grcov
-  # rust-analyzer   → binary: rust-analyzer
-  # rustfmt         → binary: rustfmt  (Nix package, standalone)
-  #
-  # All are Nix packages and should be present once devbox packages are
-  # installed. A missing entry here indicates a devbox.json mismatch.
+  # Note: rustfmt and rust-analyzer come from the rustup toolchain
+  # (rust-toolchain.toml components), not from separate Nix packages.
   local tool
-  for tool in rustfmt cargo-nextest cargo-audit cargo-deny grcov rust-analyzer; do
+  for tool in cargo-nextest cargo-audit cargo-deny grcov; do
     if dbx_has "${tool}"; then
       _record "${tool}" ok "$(command -v "${tool}")"
     else
@@ -173,8 +186,8 @@ print_matrix() {
 
   local ordered_keys=(
     git curl jq gh
-    rustup rustc cargo
-    rustfmt cargo-nextest cargo-audit cargo-deny grcov rust-analyzer
+    rustup rustc cargo rustfmt rust-analyzer
+    cargo-nextest cargo-audit cargo-deny grcov
     make mold
     gitleaks
   )
