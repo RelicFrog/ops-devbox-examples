@@ -119,11 +119,12 @@ check_cargo_tools() {
   # cargo-deny      → binary: cargo-deny
   # grcov           → binary: grcov
   # rust-analyzer   → binary: rust-analyzer
+  # rustfmt         → binary: rustfmt  (Nix package, standalone)
   #
   # All are Nix packages and should be present once devbox packages are
   # installed. A missing entry here indicates a devbox.json mismatch.
   local tool
-  for tool in cargo-nextest cargo-audit cargo-deny grcov rust-analyzer; do
+  for tool in rustfmt cargo-nextest cargo-audit cargo-deny grcov rust-analyzer; do
     if dbx_has "${tool}"; then
       _record "${tool}" ok "$(command -v "${tool}")"
     else
@@ -173,7 +174,7 @@ print_matrix() {
   local ordered_keys=(
     git curl jq gh
     rustup rustc cargo
-    cargo-nextest cargo-audit cargo-deny grcov rust-analyzer
+    rustfmt cargo-nextest cargo-audit cargo-deny grcov rust-analyzer
     make mold
     gitleaks
   )

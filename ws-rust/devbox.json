@@ -64,6 +64,7 @@
     "gnumake": "4.4.1",
     "pre-commit": "4.5.1",
     "rustup": "1.29.0",
+    "rustfmt": "1.95.0",
     "cargo-nextest": "0.9.137",
     "cargo-audit": "0.22.1",
     "cargo-deny": "0.19.8",
