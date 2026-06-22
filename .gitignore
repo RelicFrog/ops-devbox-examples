@@ -1,0 +1,48 @@
+# DevBox Workshop — Gitignore
+
+# --- Nix / Devbox ---
+.devbox/
+.devenv/
+.direnv/
+
+# --- Rust ---
+target/
+Cargo.lock
+
+# --- Node.js ---
+node_modules/
+dist/
+.next/
+.nuxt/
+
+# --- Go ---
+vendor/
+
+# --- Editor / IDE ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# --- Environment files ---
+.env
+.env.local
+.env.*.local
+*.env
+
+# --- Build artefacts ---
+*.o
+*.a
+*.so
+*.dylib
+
+# --- Test / coverage ---
+coverage/
+lcov.info
+tarpaulin-report.html
+
+# --- Security scan artefacts ---
+gitleaks-report.json
+trivy-report.json

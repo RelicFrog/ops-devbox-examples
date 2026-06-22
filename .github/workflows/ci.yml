@@ -1,0 +1,30 @@
+# Copyright 2026 TEAM RelicFrog
+# SPDX-License-Identifier: Apache-2.0
+#
+# .github/workflows/ci.yml — Root CI pipeline
+#
+# Calls the sub-workflow of each workspace as a reusable job.
+# To add a new workspace: add a job that uses its sub-workflow path.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ws-rust:
+    name: ws-rust
+    uses: ./.github/workflows/ci-ws-rust.yml
+
+  # Placeholder jobs for upcoming workspaces (uncomment when ready):
+  #
+  # ws-go:
+  #   name: ws-go
+  #   uses: ./.github/workflows/ci-ws-go.yml
+  #
+  # ws-node:
+  #   name: ws-node
+  #   uses: ./.github/workflows/ci-ws-node.yml
