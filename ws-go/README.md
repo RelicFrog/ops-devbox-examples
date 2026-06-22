@@ -1,7 +1,7 @@
 # ws-go — primes-cli
 
 [![ws-go CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-go.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-go.yml)
-[![Go](https://img.shields.io/badge/go-1.22.5-00ADD8?logo=go)](https://go.dev)
+[![Go](https://img.shields.io/badge/go-1.24.13-00ADD8?logo=go)](https://go.dev)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](../LICENSE)
 [![Devbox](https://img.shields.io/badge/devbox-ready-5C5CFF?logo=nixos&logoColor=white)](https://www.jetify.com/devbox)
 [![Platform](https://img.shields.io/badge/platform-macOS%20ARM64-lightgrey?logo=apple)](https://developer.apple.com/silicon/)
@@ -38,7 +38,7 @@ with identical subcommands and behaviour.
 | [Nix](https://nixos.org/download) | Package backend (auto-installed by Devbox) |
 | macOS Apple Silicon | Primary development platform |
 
-All other tools (Go 1.22.5, gofumpt, golangci-lint, govulncheck, gnumake, gh, …)
+All other tools (Go 1.24.13, gofumpt, golangci-lint, govulncheck, gnumake, gh, …)
 are provided by Devbox from the Nix store and require no separate installation.
 
 ---
@@ -151,10 +151,10 @@ Additional devbox-only targets (no Makefile equivalent):
 All Go toolchain binaries come directly from the Nix store via devbox:
 
 ```
-.devbox/nix/profile/default/bin/go         ← Nix store (go@1.22.5)
+.devbox/nix/profile/default/bin/go         ← Nix store (go@1.24.13)
 .devbox/nix/profile/default/bin/gofmt      ← ships with go package
-.devbox/nix/profile/default/bin/gofumpt    ← Nix store (gofumpt@0.6.0)
-.devbox/nix/profile/default/bin/golangci-lint ← Nix store (golangci-lint@1.59.1)
+.devbox/nix/profile/default/bin/gofumpt    ← Nix store (gofumpt@0.10.0)
+.devbox/nix/profile/default/bin/golangci-lint ← Nix store (golangci-lint@1.64.8)
 .devbox/nix/profile/default/bin/govulncheck   ← Nix store (govulncheck@1.3.0)
 ```
 
@@ -173,9 +173,9 @@ Unlike the Rust workspace (which uses a rustup proxy), Go tooling is provided
 
 | Package | Version | Purpose |
 |---------|---------|---------|
-| `go` | 1.22.5 | Go toolchain (includes gofmt) |
-| `gofumpt` | 0.6.0 | Stricter gofmt superset formatter |
-| `golangci-lint` | 1.59.1 | Meta-linter (vet, staticcheck, errcheck, …) |
+| `go` | 1.24.13 | Go toolchain (includes gofmt) |
+| `gofumpt` | 0.10.0 | Stricter gofmt superset formatter |
+| `golangci-lint` | 1.64.8 | Meta-linter (vet, staticcheck, errcheck, …) |
 | `govulncheck` | 1.3.0 | Vulnerability scanner (Go equivalent of cargo audit) |
 | `gnumake` | 4.4.1 | Build system (from Nix, not system make) |
 | `git` | 2.54.0 | Version control |

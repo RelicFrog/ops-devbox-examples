@@ -13,7 +13,7 @@ on:
 
 env:
   CGO_ENABLED: "0"
-  GOVERSION: "1.22.5"
+  GOVERSION: "1.24.13"
 
 defaults:
   run:
@@ -39,7 +39,7 @@ jobs:
           cache-dependency-path: ws-go/go.mod
 
       - name: Install gofumpt
-        run: go install mvdan.cc/gofumpt@v0.6.0
+        run: go install mvdan.cc/gofumpt@v0.10.0
 
       - name: Format check (gofumpt)
         run: test -z "$(gofumpt -l ./src)"
@@ -47,7 +47,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.59.1
+          version: v1.64.8
           working-directory: ws-go
 
   test:
