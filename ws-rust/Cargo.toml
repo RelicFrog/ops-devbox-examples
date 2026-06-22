@@ -1,0 +1,27 @@
+[package]
+name = "primes-cli"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+authors = ["Patrick Paechnatz <patrick@relicfrog.rocks>"]
+description = "Example CLI application: prime number generator (Devbox ws-rust workshop)"
+repository = "https://github.com/RelicFrog/ops-devbox-examples"
+keywords = ["cli", "primes", "devbox", "workshop"]
+categories = ["command-line-utilities"]
+
+[[bin]]
+name = "primes-cli"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+thiserror = "2"
+
+[dev-dependencies]
+# No additional dev dependencies; unit tests use std::test
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+strip = true
+codegen-units = 1
