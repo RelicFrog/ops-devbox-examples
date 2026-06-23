@@ -41,7 +41,7 @@ pub fn build(b: *std.Build) void {
     });
 
     const integration_tests = b.addTest(.{
-        .root_source_file = b.path("tests/integration.zig"),
+        .root_source_file = b.path("src/integration_test.zig"),
         .target = target,
         .optimize = optimize,
     });
