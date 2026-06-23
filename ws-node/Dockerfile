@@ -18,7 +18,7 @@ FROM node:22-alpine AS builder
 WORKDIR /build
 
 COPY package.json package-lock.json tsconfig.json ./
-RUN npm ci --ignore-scripts 2>/dev/null || npm install --save-dev @types/node typescript
+RUN npm ci --ignore-scripts
 
 COPY src ./src
 RUN ./node_modules/.bin/tsc --project tsconfig.json
