@@ -1,0 +1,25 @@
+{
+  "name": "primes-cli",
+  "version": "1.0.0",
+  "description": "Prime number generator CLI — Devbox ws-node workshop example",
+  "type": "module",
+  "license": "Apache-2.0",
+  "author": "Patrick Paechnatz <patrick@relicfrog.rocks>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RelicFrog/ops-devbox-examples.git"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "check": "biome check ./src ./tests && tsc --noEmit",
+    "fmt": "biome format --write ./src ./tests",
+    "lint": "biome lint ./src ./tests && tsc --noEmit",
+    "test": "tsx --test src/*.test.ts tests/*.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.0"
+  }
+}
