@@ -204,14 +204,20 @@ audit-images: ## trivy HIGH/CRITICAL scan — all six primes images
 
 clean: teardown ## teardown k8s resources (alias)
 
-info: ## print workspace tool versions
-	@echo '--- ws-k8s devbox workspace ---'
-	@echo "kubectl:    $$(kubectl version --client --short 2>/dev/null || kubectl version --client 2>/dev/null | head -1)"
-	@echo "k9s:        $$(k9s version --short 2>/dev/null | head -1 || echo 'n/a')"
-	@echo "helm:       $$(helm version --short 2>/dev/null || echo 'n/a')"
-	@echo "kustomize:  $$(kustomize version 2>/dev/null | head -1 || echo 'n/a')"
-	@echo "stern:      $$(stern --version 2>/dev/null | head -1 || echo 'n/a')"
-	@echo "trivy:      $$(trivy --version 2>/dev/null | head -1 || echo 'n/a')"
-	@echo "docker:     $$(docker version --format '{{.Client.Version}}' 2>/dev/null || echo 'n/a (host service)')"
-	@echo "context:    $$(kubectl config current-context 2>/dev/null || echo 'none')"
-	@echo "Platform:   $$(uname -ms)"
+info: ## print workspace tool versions and cluster context
+	@printf '\n'
+	@printf '  \033[1m\033[34mws-k8s — devbox workspace info\033[0m\n'
+	@printf '  \033[90m%s\033[0m\n' "$$(printf '%.0s─' {1..48})"
+	@printf '  %-14s %s\n'  "kubectl"   "$$(kubectl version --client --short 2>/dev/null | head -1 || echo 'n/a')"
+	@printf '  %-14s %s\n'  "k9s"       "$$(k9s version --short 2>/dev/null | head -1 || echo 'n/a')"
+	@printf '  %-14s %s\n'  "helm"      "$$(helm version --short 2>/dev/null || echo 'n/a')"
+	@printf '  %-14s %s\n'  "kustomize" "$$(kustomize version 2>/dev/null | head -1 || echo 'n/a')"
+	@printf '  \033[90m%s\033[0m\n' "$$(printf '%.0s─' {1..48})"
+	@printf '  %-14s %s\n'  "stern"     "$$(stern --version 2>/dev/null | head -1 || echo 'n/a')"
+	@printf '  %-14s %s\n'  "trivy"     "$$(trivy --version 2>/dev/null | head -1 || echo 'n/a')"
+	@printf '  %-14s %s\n'  "docker"    "$$(docker version --format '{{.Client.Version}}' 2>/dev/null || echo 'n/a (host)')"
+	@printf '  \033[90m%s\033[0m\n' "$$(printf '%.0s─' {1..48})"
+	@printf '  %-14s %s\n'  "context"   "$$(kubectl config current-context 2>/dev/null || echo 'none')"
+	@printf '  %-14s %s\n'  "make"      "$$(make --version 2>/dev/null | head -1 || echo 'n/a')"
+	@printf '  %-14s %s\n'  "platform"  "$$(uname -ms)"
+	@printf '\n'

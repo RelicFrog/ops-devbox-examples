@@ -10,7 +10,7 @@
 
 .DEFAULT_GOAL := help
 
-.PHONY: help build check fmt lint test audit clean docker-build docker-run
+.PHONY: help build check fmt lint test audit clean docker-build docker-run info
 
 IMG := primes-node:latest
 
@@ -89,3 +89,24 @@ docker-build: ## docker buildx build — primes-node:latest
 docker-run: ## docker run — smoke test the container image
 	docker run --rm $(IMG) check 97
 	docker run --rm $(IMG) nth 10
+
+info: ## print workspace tool versions and Nix toolchain path
+	@printf '\n'
+	@printf '  \033[1m\033[34mws-node — devbox workspace info\033[0m\n'
+	@printf '  \033[90m%s\033[0m\n' "$$(printf '%.0s─' {1..48})"
+	@printf '  %-14s %s\n'  "node"  "$(node --version 2>/dev/null || echo 'n/a')"
+	@printf '  %-14s ' "From Nix?"; \
+	  if which node 2>/dev/null | grep -q nix; then \
+	    printf '\033[32myes\033[0m\n'; \
+	  else \
+	    printf '\033[33mno (outside devbox shell)\033[0m\n'; \
+	  fi
+	@printf '  \033[90m%s\033[0m\n' "$$(printf '%.0s─' {1..48})"
+	@printf '  %-14s %s\n'  "tsc"  "$(tsc --version 2>/dev/null || echo 'n/a')"
+	@printf '  %-14s %s\n'  "tsx"  "$(tsx --version 2>/dev/null || echo 'n/a')"
+	@printf '  %-14s %s\n'  "biome"  "$(biome --version 2>/dev/null || echo 'n/a')"
+	@printf '  \033[90m%s\033[0m\n' "$$(printf '%.0s─' {1..48})"
+	@printf '  %-14s %s\n'  "make"     "$$(make --version 2>/dev/null | head -1 || echo 'n/a')"
+	@printf '  %-14s %s\n'  "git"      "$$(git --version 2>/dev/null || echo 'n/a')"
+	@printf '  %-14s %s\n'  "platform" "$$(uname -ms)"
+	@printf '\n'

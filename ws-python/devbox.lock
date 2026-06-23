@@ -793,7 +793,7 @@
         }
       }
     },
-    "python313Packages.pytest-cov@latest": {
+    "python313Packages.pytest-cov@7.1.0": {
       "last_modified": "2026-05-29T05:01:12Z",
       "resolved": "github:NixOS/nixpkgs/e9a7635a57597d9754eccebdfc7045e6c8600e6b#python313Packages.pytest-cov",
       "source": "devbox-search",

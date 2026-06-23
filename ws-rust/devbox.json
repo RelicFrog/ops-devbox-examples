@@ -5,6 +5,7 @@
     "CARGO_TERM_COLOR": "always",
     "CARGO_INCREMENTAL": "0",
     "RUSTC_WRAPPER": "",
+    "PATH": "$PATH:$PWD/bin",
     "C_DBX_META_TEAM": "RelicFrog",
     "C_DBX_META_PROJECT_ID": "ops-devbox-examples/ws-rust",
     "C_DBX_META_VERSION": "1",
