@@ -7,7 +7,8 @@
     "RUSTC_WRAPPER": "",
     "C_DBX_META_TEAM": "RelicFrog",
     "C_DBX_META_PROJECT_ID": "ops-devbox-examples/ws-rust",
-    "C_DBX_META_VERSION": "1"
+    "C_DBX_META_VERSION": "1",
+    "POWERLEVEL9K_INSTANT_PROMPT": "quiet"
   },
   "shell": {
     "init_hook": [
