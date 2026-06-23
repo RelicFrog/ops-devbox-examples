@@ -53,11 +53,14 @@ jobs:
       - name: Install Biome
         run: npm install --save-dev --exact @biomejs/biome@2.4.16
 
+      - name: Install TypeScript
+        run: npm install --save-dev typescript@5.9.3
+
       - name: Biome check
-        run: npx biome check ./src ./tests
+        run: npx --no-install biome check ./src ./tests
 
       - name: TypeScript check
-        run: npx tsc --noEmit
+        run: ./node_modules/.bin/tsc --noEmit
 
   test:
     name: Test (${{ matrix.os }})
@@ -81,4 +84,4 @@ jobs:
         run: npm install --save-dev @types/node tsx@4.21.0 typescript@5.9.3
 
       - name: Run tests
-        run: npx tsx --test src/*.test.ts tests/*.test.ts
+        run: ./node_modules/.bin/tsx --test src/*.test.ts tests/*.test.ts
