@@ -12,7 +12,7 @@
 .DEFAULT_GOAL := help
 
 .PHONY: help build-all build-rust build-go build-node \
-        deploy-all deploy-rust deploy-go deploy-node \
+        namespace deploy-all deploy-rust deploy-go deploy-node \
         teardown status logs-rust logs-go logs-node \
         exec-rust exec-go exec-node \
         images-load audit-images clean
@@ -52,21 +52,29 @@ build-all: build-rust build-go build-node ## build all three images
 # Deploy to local OrbStack k8s cluster
 # ---------------------------------------------------------------------------
 
-deploy-rust: ## kubectl apply — primes-rust deployment + service
-	kubectl apply -f manifests/rust/
+namespace: ## create the primes-workshop namespace (idempotent)
+	kubectl apply -f manifests/rust/namespace.yaml
+	kubectl wait --for=jsonpath='{.status.phase}'=Active \
+	  namespace/$(NS) --timeout=15s
 
-deploy-go: ## kubectl apply — primes-go deployment + service
-	kubectl apply -f manifests/go/
+deploy-rust: namespace ## kubectl apply — primes-rust deployment
+	kubectl apply -f manifests/rust/deployment.yaml
 
-deploy-node: ## kubectl apply — primes-node deployment + service
-	kubectl apply -f manifests/node/
+deploy-go: namespace ## kubectl apply — primes-go deployment
+	kubectl apply -f manifests/go/deployment.yaml
 
-deploy-all: deploy-rust deploy-go deploy-node ## deploy all three apps
+deploy-node: namespace ## kubectl apply — primes-node deployment
+	kubectl apply -f manifests/node/deployment.yaml
+
+deploy-all: namespace ## deploy all three apps and wait for Ready
+	kubectl apply -f manifests/rust/deployment.yaml
+	kubectl apply -f manifests/go/deployment.yaml
+	kubectl apply -f manifests/node/deployment.yaml
 	@echo ""
 	@echo "Waiting for pods to be ready..."
-	kubectl wait --namespace $(NS) --for=condition=Ready pod --selector=app=primes-rust --timeout=60s || true
-	kubectl wait --namespace $(NS) --for=condition=Ready pod --selector=app=primes-go   --timeout=60s || true
-	kubectl wait --namespace $(NS) --for=condition=Ready pod --selector=app=primes-node --timeout=60s || true
+	kubectl wait --namespace $(NS) --for=condition=Ready pod --selector=app=primes-rust --timeout=90s || true
+	kubectl wait --namespace $(NS) --for=condition=Ready pod --selector=app=primes-go   --timeout=90s || true
+	kubectl wait --namespace $(NS) --for=condition=Ready pod --selector=app=primes-node --timeout=90s || true
 	@echo ""
 	$(MAKE) status
 
