@@ -1,0 +1,59 @@
+# Copyright 2026 TEAM RelicFrog
+# SPDX-License-Identifier: Apache-2.0
+#
+# ws-node/.pre-commit-config.yaml
+#
+# Pre-commit hooks for the ws-node workspace.
+# All hooks use tools installed by devbox (Nix packages).
+
+default_install_hook_types:
+  - pre-commit
+
+default_stages:
+  - pre-commit
+
+fail_fast: false
+
+repos:
+  # ---------------------------------------------------------------------------
+  # Generic file hygiene
+  # ---------------------------------------------------------------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        name: trim trailing whitespace
+      - id: end-of-file-fixer
+        name: fix end of file
+      - id: check-yaml
+        name: check yaml syntax
+      - id: check-toml
+        name: check toml syntax
+      - id: check-json
+        name: check json syntax
+      - id: check-merge-conflict
+        name: check for merge conflicts
+      - id: mixed-line-ending
+        args: [--fix=lf]
+        name: enforce LF line endings
+
+  # ---------------------------------------------------------------------------
+  # Node.js / TypeScript — local hooks (tools from devbox Nix packages)
+  # ---------------------------------------------------------------------------
+  - repo: local
+    hooks:
+      # --- Format + lint (Biome handles both in one pass) -------------------
+      - id: biome-check
+        name: biome check
+        language: system
+        entry: biome check ./src ./tests
+        types_or: [ts, javascript]
+        pass_filenames: false
+
+      # --- Type check --------------------------------------------------------
+      - id: tsc
+        name: tsc --noEmit
+        language: system
+        entry: tsc --noEmit
+        types: [ts]
+        pass_filenames: false
