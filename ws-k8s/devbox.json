@@ -1,0 +1,68 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.14.2/.schema/devbox.schema.json",
+  "env": {
+    "KUBECONFIG": "$HOME/.kube/config",
+    "PATH": "$PATH:$PWD/bin",
+    "C_DBX_META_TEAM": "RelicFrog",
+    "C_DBX_META_PROJECT_ID": "ops-devbox-examples/ws-k8s",
+    "C_DBX_META_VERSION": "1",
+    "POWERLEVEL9K_INSTANT_PROMPT": "quiet"
+  },
+  "shell": {
+    "init_hook": [
+      "scripts/devbox/dbx_init.sh"
+    ],
+    "scripts": {
+      "deploy-all": [
+        "make deploy-all"
+      ],
+      "teardown": [
+        "make teardown"
+      ],
+      "build-all": [
+        "make build-all"
+      ],
+      "status": [
+        "make status"
+      ],
+      "logs-rust": [
+        "make logs-rust"
+      ],
+      "logs-go": [
+        "make logs-go"
+      ],
+      "logs-node": [
+        "make logs-node"
+      ],
+      "info": [
+        "echo '--- ws-k8s devbox workspace ---'",
+        "echo \"kubectl:    $(kubectl version --client --short 2>/dev/null || kubectl version --client 2>/dev/null | head -1 || echo 'not available')\"",
+        "echo \"k9s:        $(k9s version --short 2>/dev/null | head -1 || echo 'not available')\"",
+        "echo \"helm:       $(helm version --short 2>/dev/null || echo 'not available')\"",
+        "echo \"kustomize:  $(kustomize version 2>/dev/null | head -1 || echo 'not available')\"",
+        "echo \"docker:     $(docker version --format '{{.Client.Version}}' 2>/dev/null || echo 'not available (host service)')\"",
+        "echo \"Platform:   $(uname -ms)\""
+      ],
+      "docs": [
+        "glow --pager README.md"
+      ]
+    }
+  },
+  "packages": {
+    "kubectl": "1.36.1",
+    "k9s": "0.51.0",
+    "kubectx": "0.11.0",
+    "kustomize": "5.8.1",
+    "kubernetes-helm": "3.20.2",
+    "stern": "1.34.0",
+    "yq-go": "4.53.3",
+    "trivy": "0.71.1",
+    "git": "2.54.0",
+    "gh": "2.52.0",
+    "jq": "1.8.1",
+    "curl": "8.17.0",
+    "bat": "0.24.0",
+    "glow": "2.1.2",
+    "gnumake": "4.4.1"
+  }
+}

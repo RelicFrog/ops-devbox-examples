@@ -21,6 +21,7 @@ toolchain, build system, CI pipeline, and example application.
 | [`ws-rust`](./ws-rust/) | Rust 2024 | [`primes-cli`](./ws-rust/src/main.rs) — prime number generator | [![ws-rust CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-rust.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-rust.yml) | active |
 | [`ws-go`](./ws-go/) | Go 1.24.13 | [`primes-cli`](./ws-go/src/cmd/main.go) — prime number generator | [![ws-go CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-go.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-go.yml) | active |
 | [`ws-node`](./ws-node/) | Node.js 22 / TypeScript | [`primes-cli`](./ws-node/src/main.ts) — prime number generator | [![ws-node CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-node.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-node.yml) | active |
+| [`ws-k8s`](./ws-k8s/) | Kubernetes / OrbStack | kubectl exec wrappers for all three primes-cli images | — | active |
 
 ---
 
@@ -86,6 +87,11 @@ ops-devbox-examples/
 │   ├── src/                    # primes-cli source (primes.ts + main.ts)
 │   ├── tests/                  # Integration tests
 │   └── scripts/devbox/         # Init hook, preflight checks, OS overrides
+├── ws-k8s/                     # Kubernetes workspace (active — requires OrbStack)
+│   ├── devbox.json             # Pinned tools: kubectl, k9s, helm, kustomize, stern, trivy, …
+│   ├── Makefile                # build-all / deploy-all / exec-* / teardown
+│   ├── bin/                    # kubectl exec wrappers: primes-{rust,go,node}
+│   └── manifests/              # Raw YAML: namespace + deployments per language
 ├── LICENSE                     # Apache-2.0
 └── README.md
 ```
@@ -163,6 +169,7 @@ Adding a new workspace requires only registering its reusable workflow in
 | ws-rust workspace | [./ws-rust/](./ws-rust/) |
 | ws-go workspace | [./ws-go/](./ws-go/) |
 | ws-node workspace | [./ws-node/](./ws-node/) |
+| ws-k8s workspace | [./ws-k8s/](./ws-k8s/) |
 
 ---
 

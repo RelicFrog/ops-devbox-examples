@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Copyright 2026 TEAM RelicFrog — Apache-2.0
+#
+# ws-k8s/bin/primes-node
+#
+# kubectl exec wrapper — runs primes-cli inside the primes-node pod.
+
+set -euo pipefail
+
+NS="primes-workshop"
+LABEL="app=primes-node"
+BINARY="/usr/local/bin/primes-cli"
+
+pod="$(kubectl get pod \
+  --namespace "${NS}" \
+  --selector "${LABEL}" \
+  --field-selector status.phase=Running \
+  -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)"
+
+if [[ -z "${pod}" ]]; then
+  echo "error: no running primes-node pod found in namespace '${NS}'" >&2
+  echo "  Run: make deploy-node  (from ws-k8s/)" >&2
+  exit 1
+fi
+
+exec kubectl exec \
+  --namespace "${NS}" \
+  --stdin=false \
+  --tty=false \
+  "${pod}" \
+  -- "${BINARY}" "$@"

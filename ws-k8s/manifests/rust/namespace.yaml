@@ -1,0 +1,11 @@
+# Copyright 2026 TEAM RelicFrog
+# SPDX-License-Identifier: Apache-2.0
+#
+# ws-k8s/manifests/rust/namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: primes-workshop
+  labels:
+    app.kubernetes.io/managed-by: kubectl
+    example: devbox-workshop

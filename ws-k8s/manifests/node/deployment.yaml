@@ -1,0 +1,40 @@
+# Copyright 2026 TEAM RelicFrog
+# SPDX-License-Identifier: Apache-2.0
+#
+# ws-k8s/manifests/node/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: primes-node
+  namespace: primes-workshop
+  labels:
+    app: primes-node
+    lang: node
+    example: devbox-workshop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: primes-node
+  template:
+    metadata:
+      labels:
+        app: primes-node
+        lang: node
+    spec:
+      containers:
+        - name: primes-node
+          image: primes-node:latest
+          imagePullPolicy: Never
+          # Default CMD keeps the container alive; kubectl exec calls /usr/local/bin/primes-cli
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000

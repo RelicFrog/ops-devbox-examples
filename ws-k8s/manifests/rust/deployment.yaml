@@ -1,0 +1,44 @@
+# Copyright 2026 TEAM RelicFrog
+# SPDX-License-Identifier: Apache-2.0
+#
+# ws-k8s/manifests/rust/deployment.yaml
+#
+# Runs primes-rust as a long-lived pod (sleep loop) so kubectl exec
+# can invoke primes-cli inside the container on demand.
+# The container image must be built locally: make docker-build (ws-rust)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: primes-rust
+  namespace: primes-workshop
+  labels:
+    app: primes-rust
+    lang: rust
+    example: devbox-workshop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: primes-rust
+  template:
+    metadata:
+      labels:
+        app: primes-rust
+        lang: rust
+    spec:
+      containers:
+        - name: primes-rust
+          image: primes-rust:latest
+          imagePullPolicy: Never          # local OrbStack image — no registry push
+          # Default CMD keeps the container alive; kubectl exec calls /primes-cli directly
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "16Mi"
+            limits:
+              cpu: "200m"
+              memory: "64Mi"
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsNonRoot: false           # scratch image has no users
