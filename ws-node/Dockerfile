@@ -44,5 +44,7 @@ COPY --from=builder /build/package.json ./
 RUN printf '#!/bin/sh\nexec node /app/dist/main.js "$@"\n' > /usr/local/bin/primes-cli && \
     chmod +x /usr/local/bin/primes-cli
 
-ENTRYPOINT ["/usr/local/bin/primes-cli"]
-CMD ["help"]
+# Keep the container alive for kubectl exec invocations.
+# Call /usr/local/bin/primes-cli directly via kubectl exec.
+ENTRYPOINT ["/bin/sh", "-c"]
+CMD ["echo 'primes-node ready'; while true; do sleep 3600; done"]
