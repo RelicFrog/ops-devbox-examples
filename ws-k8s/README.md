@@ -7,8 +7,8 @@
 
 Kubernetes workspace for the [ops-devbox-examples](../) repository.
 Demonstrates a reproducible devbox environment with a full k8s toolchain,
-containerised versions of the three `primes-cli` applications (Rust, Go,
-Node.js), and `kubectl exec` wrappers that let you call each CLI from inside
+containerised versions of the five `primes-cli` applications (Rust, Go,
+Node.js, Zig, Lua), and `kubectl exec` wrappers that let you call each CLI from inside
 its running pod — as if it were a local binary.
 
 **Target:** local single-node Kubernetes cluster provided by OrbStack.
@@ -37,12 +37,16 @@ OrbStack (1-node k8s)
   └── namespace: primes-workshop
         ├── deployment/primes-rust   ← busybox + /primes-cli  (Rust static binary)
         ├── deployment/primes-go     ← busybox + /primes-cli  (Go static binary)
+        ├── deployment/primes-zig  ← alpine:3.21 + /primes-cli  (Zig static binary)
+        ├── deployment/primes-lua   ← alpine:3.21 + luajit + /usr/local/bin/primes-cli
         └── deployment/primes-node   ← node:22-alpine + /usr/local/bin/primes-cli
 
 ws-k8s/bin/
   ├── primes-rust   ← kubectl exec → pod → /primes-cli $@
   ├── primes-go     ← kubectl exec → pod → /primes-cli $@
-  └── primes-node   ← kubectl exec → pod → /usr/local/bin/primes-cli $@
+  ├── primes-zig    ← kubectl exec → pod → /primes-cli $@
+├── primes-lua    ← kubectl exec → pod → /usr/local/bin/primes-cli $@
+└── primes-node   ← kubectl exec → pod → /usr/local/bin/primes-cli $@
 ```
 
 Each pod runs a long-lived `sleep` loop (via the image's default CMD)
@@ -54,9 +58,11 @@ service endpoint. Pure CLI-in-a-box.
 
 | Image | Base | Binary path | Build |
 |-------|------|------------|-------|
-| `primes-rust:latest` | `busybox:stable-musl` | `/primes-cli` | `make docker-build` in `ws-rust/` |
+| `primes-rust:latest` | `alpine:3.21` | `/primes-cli` | `make docker-build` in `ws-rust/` |
 | `primes-go:latest` | `busybox:stable-musl` | `/primes-cli` | `make docker-build` in `ws-go/` |
 | `primes-node:latest` | `node:22-alpine` | `/usr/local/bin/primes-cli` | `make docker-build` in `ws-node/` |
+| `primes-zig:latest` | `alpine:3.21` | `/primes-cli` | `make docker-build` in `ws-zig/` |
+| `primes-lua:latest` | `alpine:3.21` + luajit | `/usr/local/bin/primes-cli` | `make docker-build` in `ws-lua/` |
 
 ---
 
@@ -241,14 +247,14 @@ All k8s tooling comes directly from the Nix store. Docker is explicitly
 
 | Target | Description |
 |--------|-------------|
-| `build-all` | docker buildx build all three images |
-| `build-rust/go/node` | build individual image |
+| `build-all` | docker buildx build all five images |
+| `build-rust/go/node/zig/lua` | build individual image |
 | `deploy-all` | apply all manifests + wait for Ready |
-| `deploy-rust/go/node` | apply individual deployment |
-| `status` | kubectl get pods/deployments/services |
-| `logs-rust/go/node` | stern log tail |
-| `exec-rust/go/node` | kubectl exec (set ARGS='check 97') |
-| `audit-images` | trivy HIGH/CRITICAL scan on all images |
+| `deploy-rust/go/node/zig/lua` | apply individual deployment |
+| `status` | kubectl get pods/deployments |
+| `logs-rust/go/node/zig/lua` | stern log tail |
+| `exec-rust/go/node/zig/lua` | kubectl exec (set ARGS='check 97') |
+| `audit-images` | trivy HIGH/CRITICAL scan on all five images |
 | `teardown` | delete namespace + all resources |
 
 ---

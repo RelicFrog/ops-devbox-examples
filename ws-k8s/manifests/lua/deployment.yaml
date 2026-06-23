@@ -1,0 +1,33 @@
+# Copyright 2026 TEAM RelicFrog
+# SPDX-License-Identifier: Apache-2.0
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: primes-lua
+  namespace: primes-workshop
+  labels:
+    app: primes-lua
+    lang: lua
+    example: devbox-workshop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: primes-lua
+  template:
+    metadata:
+      labels:
+        app: primes-lua
+        lang: lua
+    spec:
+      containers:
+        - name: primes-lua
+          image: primes-lua:latest
+          imagePullPolicy: Never
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "32Mi"
+            limits:
+              cpu: "200m"
+              memory: "64Mi"

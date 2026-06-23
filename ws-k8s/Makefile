@@ -11,17 +11,22 @@
 
 .DEFAULT_GOAL := help
 
-.PHONY: help build-all build-rust build-go build-node \
-        namespace deploy-all deploy-rust deploy-go deploy-node \
-        teardown status logs-rust logs-go logs-node \
-        exec-rust exec-go exec-node \
+.PHONY: help \
+        build-all build-rust build-go build-node build-zig build-lua \
+        namespace \
+        deploy-all deploy-rust deploy-go deploy-node deploy-zig deploy-lua \
+        teardown status \
+        logs-rust logs-go logs-node logs-zig logs-lua \
+        exec-rust exec-go exec-node exec-zig exec-lua \
         audit-images info clean
 
-NS        := primes-workshop
-IMG_RUST  := primes-rust:latest
-IMG_GO    := primes-go:latest
-IMG_NODE  := primes-node:latest
-ROOT      := $(shell cd .. && pwd)
+NS       := primes-workshop
+IMG_RUST := primes-rust:latest
+IMG_GO   := primes-go:latest
+IMG_NODE := primes-node:latest
+IMG_ZIG  := primes-zig:latest
+IMG_LUA  := primes-lua:latest
+ROOT     := $(shell cd .. && pwd)
 
 # ---------------------------------------------------------------------------
 # Help
@@ -30,7 +35,7 @@ ROOT      := $(shell cd .. && pwd)
 help: ## Show this help message
 	@printf '\nUsage: make <target>\n\n'
 	@printf 'Targets:\n'
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / { printf "  %-18s %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / { printf "  %-20s %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 	@printf '\nAll build targets require Docker on the host PATH (OrbStack / Docker Desktop).\n\n'
 
 # ---------------------------------------------------------------------------
@@ -46,7 +51,13 @@ build-go: ## docker buildx build — primes-go:latest
 build-node: ## docker buildx build — primes-node:latest
 	$(MAKE) -C $(ROOT)/ws-node docker-build
 
-build-all: build-rust build-go build-node ## build all three images
+build-zig: ## docker buildx build — primes-zig:latest
+	$(MAKE) -C $(ROOT)/ws-zig docker-build
+
+build-lua: ## docker buildx build — primes-lua:latest
+	$(MAKE) -C $(ROOT)/ws-lua docker-build
+
+build-all: build-rust build-go build-node build-zig build-lua ## build all five images
 
 # ---------------------------------------------------------------------------
 # Deploy to local OrbStack k8s cluster
@@ -66,15 +77,25 @@ deploy-go: namespace ## kubectl apply — primes-go deployment
 deploy-node: namespace ## kubectl apply — primes-node deployment
 	kubectl apply -f manifests/node/deployment.yaml
 
-deploy-all: namespace ## deploy all three apps and wait for Ready
+deploy-zig: namespace ## kubectl apply — primes-zig deployment
+	kubectl apply -f manifests/zig/deployment.yaml
+
+deploy-lua: namespace ## kubectl apply — primes-lua deployment
+	kubectl apply -f manifests/lua/deployment.yaml
+
+deploy-all: namespace ## deploy all five apps and wait for Ready
 	kubectl apply -f manifests/rust/deployment.yaml
 	kubectl apply -f manifests/go/deployment.yaml
 	kubectl apply -f manifests/node/deployment.yaml
+	kubectl apply -f manifests/zig/deployment.yaml
+	kubectl apply -f manifests/lua/deployment.yaml
 	@echo ""
 	@echo "Waiting for pods to be ready..."
 	kubectl wait --namespace $(NS) --for=condition=Ready pod --selector=app=primes-rust --timeout=90s || true
 	kubectl wait --namespace $(NS) --for=condition=Ready pod --selector=app=primes-go   --timeout=90s || true
 	kubectl wait --namespace $(NS) --for=condition=Ready pod --selector=app=primes-node --timeout=90s || true
+	kubectl wait --namespace $(NS) --for=condition=Ready pod --selector=app=primes-zig  --timeout=90s || true
+	kubectl wait --namespace $(NS) --for=condition=Ready pod --selector=app=primes-lua  --timeout=90s || true
 	@echo ""
 	$(MAKE) status
 
@@ -82,17 +103,17 @@ deploy-all: namespace ## deploy all three apps and wait for Ready
 # Teardown
 # ---------------------------------------------------------------------------
 
-teardown: ## delete all primes-* deployments and the namespace (force, no grace period)
+teardown: ## delete namespace + all resources (force, no grace period)
 	kubectl delete namespace $(NS) --ignore-not-found --grace-period=0 --force
 
 # ---------------------------------------------------------------------------
 # Status
 # ---------------------------------------------------------------------------
 
-status: ## show pods, deployments, and services in the primes-workshop namespace
+status: ## show pods and deployments in the primes-workshop namespace
 	@echo ""
 	@echo "=== Namespace: $(NS) ==="
-	kubectl get pods,deployments,services --namespace $(NS) 2>/dev/null || \
+	kubectl get pods,deployments --namespace $(NS) 2>/dev/null || \
 	  echo "Namespace $(NS) not found — run 'make deploy-all' first."
 
 # ---------------------------------------------------------------------------
@@ -108,43 +129,57 @@ logs-go: ## stern logs — primes-go pods
 logs-node: ## stern logs — primes-node pods
 	stern --namespace $(NS) --selector app=primes-node --tail 50
 
+logs-zig: ## stern logs — primes-zig pods
+	stern --namespace $(NS) --selector app=primes-zig --tail 50
+
+logs-lua: ## stern logs — primes-lua pods
+	stern --namespace $(NS) --selector app=primes-lua --tail 50
+
 # ---------------------------------------------------------------------------
 # kubectl exec wrappers — run primes-cli inside the running pods
 # ---------------------------------------------------------------------------
 
-exec-rust: ## kubectl exec — run primes-rust pod (ARGS='check 97')
+exec-rust: ## kubectl exec — primes-rust pod (ARGS='check 97')
 	kubectl exec --namespace $(NS) \
 	  $$(kubectl get pod --namespace $(NS) -l app=primes-rust -o jsonpath='{.items[0].metadata.name}') \
 	  -- /primes-cli $(ARGS)
 
-exec-go: ## kubectl exec — run primes-go pod (ARGS='nth 100')
+exec-go: ## kubectl exec — primes-go pod (ARGS='nth 100')
 	kubectl exec --namespace $(NS) \
 	  $$(kubectl get pod --namespace $(NS) -l app=primes-go -o jsonpath='{.items[0].metadata.name}') \
 	  -- /primes-cli $(ARGS)
 
-exec-node: ## kubectl exec — run primes-node pod (ARGS='list --to 20')
+exec-node: ## kubectl exec — primes-node pod (ARGS='list --to 20')
 	kubectl exec --namespace $(NS) \
 	  $$(kubectl get pod --namespace $(NS) -l app=primes-node -o jsonpath='{.items[0].metadata.name}') \
+	  -- /usr/local/bin/primes-cli $(ARGS)
+
+exec-zig: ## kubectl exec — primes-zig pod (ARGS='check 97')
+	kubectl exec --namespace $(NS) \
+	  $$(kubectl get pod --namespace $(NS) -l app=primes-zig -o jsonpath='{.items[0].metadata.name}') \
+	  -- /primes-cli $(ARGS)
+
+exec-lua: ## kubectl exec — primes-lua pod (ARGS='nth 10')
+	kubectl exec --namespace $(NS) \
+	  $$(kubectl get pod --namespace $(NS) -l app=primes-lua -o jsonpath='{.items[0].metadata.name}') \
 	  -- /usr/local/bin/primes-cli $(ARGS)
 
 # ---------------------------------------------------------------------------
 # Security scan
 # ---------------------------------------------------------------------------
 
-audit-images: ## trivy image scan — all three primes images
+audit-images: ## trivy HIGH/CRITICAL scan — all five primes images
 	trivy image --severity HIGH,CRITICAL $(IMG_RUST)
 	trivy image --severity HIGH,CRITICAL $(IMG_GO)
 	trivy image --severity HIGH,CRITICAL $(IMG_NODE)
+	trivy image --severity HIGH,CRITICAL $(IMG_ZIG)
+	trivy image --severity HIGH,CRITICAL $(IMG_LUA)
 
 # ---------------------------------------------------------------------------
-# Cleanup
+# Cleanup / Info
 # ---------------------------------------------------------------------------
 
 clean: teardown ## teardown k8s resources (alias)
-
-# ---------------------------------------------------------------------------
-# Info
-# ---------------------------------------------------------------------------
 
 info: ## print workspace tool versions
 	@echo '--- ws-k8s devbox workspace ---'

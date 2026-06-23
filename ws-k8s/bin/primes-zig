@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# ws-k8s/bin/primes-zig — kubectl exec wrapper
+set -euo pipefail
+NS="primes-workshop"
+pod="$(kubectl get pod --namespace "${NS}" --selector app=primes-zig \
+  --field-selector status.phase=Running \
+  -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)"
+if [[ -z "${pod}" ]]; then
+  echo "error: no running primes-zig pod in namespace '${NS}'" >&2
+  echo "  Run: make deploy-zig  (from ws-k8s/)" >&2
+  exit 1
+fi
+exec kubectl exec --namespace "${NS}" --stdin=false --tty=false \
+  "${pod}" -- /primes-cli "$@"
