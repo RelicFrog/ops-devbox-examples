@@ -10,9 +10,10 @@
 
 .DEFAULT_GOAL := help
 
-.PHONY: help build check fmt lint test audit clean
+.PHONY: help build check fmt lint test audit clean docker-build docker-run
 
 BINARY    := primes-cli
+IMG       := primes-go:latest
 BUILD_DIR := bin
 SRC       := ./src/cmd/...
 
@@ -79,3 +80,14 @@ audit: ## govulncheck + go mod verify
 clean: ## remove bin/ and test cache
 	@rm -rf $(BUILD_DIR)
 	go clean -testcache
+
+# ---------------------------------------------------------------------------
+# Container build (requires Docker on host — OrbStack / Docker Desktop)
+# ---------------------------------------------------------------------------
+
+docker-build: ## docker buildx build — primes-go:latest
+	docker buildx build --platform linux/arm64 -t $(IMG) --load .
+
+docker-run: ## docker run — smoke test the container image
+	docker run --rm $(IMG) check 97
+	docker run --rm $(IMG) nth 10

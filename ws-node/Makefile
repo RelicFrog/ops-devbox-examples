@@ -10,7 +10,9 @@
 
 .DEFAULT_GOAL := help
 
-.PHONY: help build check fmt lint test audit clean
+.PHONY: help build check fmt lint test audit clean docker-build docker-run
+
+IMG := primes-node:latest
 
 DIST := dist
 
@@ -76,3 +78,14 @@ audit: ## npm audit (no node_modules — zero deps to audit)
 
 clean: ## remove dist/
 	@rm -rf $(DIST)
+
+# ---------------------------------------------------------------------------
+# Container build (requires Docker on host — OrbStack / Docker Desktop)
+# ---------------------------------------------------------------------------
+
+docker-build: ## docker buildx build — primes-node:latest
+	docker buildx build --platform linux/arm64 -t $(IMG) --load .
+
+docker-run: ## docker run — smoke test the container image
+	docker run --rm $(IMG) check 97
+	docker run --rm $(IMG) nth 10

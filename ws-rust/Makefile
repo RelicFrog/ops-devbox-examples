@@ -10,7 +10,9 @@
 
 .DEFAULT_GOAL := help
 
-.PHONY: help build check fmt lint test audit clean
+.PHONY: help build check fmt lint test audit clean docker-build docker-run
+
+IMG := primes-rust:latest
 
 # ---------------------------------------------------------------------------
 # Help — auto-generated from ## comments on each target
@@ -73,3 +75,14 @@ audit: ## cargo audit + cargo deny check
 
 clean: ## cargo clean (remove build artefacts)
 	cargo clean
+
+# ---------------------------------------------------------------------------
+# Container build (requires Docker on host — OrbStack / Docker Desktop)
+# ---------------------------------------------------------------------------
+
+docker-build: ## docker buildx build — primes-rust:latest
+	docker buildx build --platform linux/arm64 -t $(IMG) --load .
+
+docker-run: ## docker run — smoke test the container image
+	docker run --rm $(IMG) check 97
+	docker run --rm $(IMG) nth 10
