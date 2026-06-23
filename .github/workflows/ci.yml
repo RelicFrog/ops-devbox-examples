@@ -26,3 +26,11 @@ jobs:
   ws-node:
     name: ws-node
     uses: ./.github/workflows/ci-ws-node.yml
+
+  ws-zig:
+    name: ws-zig
+    uses: ./.github/workflows/ci-ws-zig.yml
+
+  ws-lua:
+    name: ws-lua
+    uses: ./.github/workflows/ci-ws-lua.yml

@@ -27,7 +27,9 @@ callable like local commands.
 | [`ws-rust`](./ws-rust/) | Rust 2024 | [`primes-cli`](./ws-rust/src/main.rs) — prime number generator | [![ws-rust CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-rust.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-rust.yml) | active |
 | [`ws-go`](./ws-go/) | Go 1.24.13 | [`primes-cli`](./ws-go/src/cmd/main.go) — prime number generator | [![ws-go CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-go.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-go.yml) | active |
 | [`ws-node`](./ws-node/) | Node.js 22 / TypeScript | [`primes-cli`](./ws-node/src/main.ts) — prime number generator | [![ws-node CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-node.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-node.yml) | active |
-| [`ws-k8s`](./ws-k8s/) | Kubernetes / OrbStack | Containerised `primes-cli` for Rust, Go, Node.js + `kubectl exec` wrappers | — | active |
+| [`ws-zig`](./ws-zig/) | Zig 0.14.1 | [`primes-cli`](./ws-zig/src/main.zig) — comptime sieve + prime generator | [![ws-zig CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-zig.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-zig.yml) | active |
+| [`ws-lua`](./ws-lua/) | LuaJIT 2.1 | [`primes-cli`](./ws-lua/src/main.lua) — prime number generator | [![ws-lua CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-lua.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-lua.yml) | active |
+| [`ws-k8s`](./ws-k8s/) | Kubernetes / OrbStack | Containerised `primes-cli` for all five languages + `kubectl exec` wrappers | — | active |
 
 ---
 
@@ -225,6 +227,12 @@ Push / PR to main
         └── ws-node (ci-ws-node.yml)
               ├── lint  — biome check + tsc --noEmit
               └── test  — tsx --test
+        ├── ws-zig (ci-ws-zig.yml)
+        │     ├── lint  — zig fmt --check src/
+        │     └── test  — zig build + zig build test
+        └── ws-lua (ci-ws-lua.yml)
+              ├── lint  — stylua --check + luacheck
+              └── test  — luajit primes_test.lua + integration_test.lua
 ```
 
 > `ws-k8s` has no CI workflow — it requires a live OrbStack cluster and
@@ -244,6 +252,8 @@ Push / PR to main
 | ws-rust workspace | [./ws-rust/](./ws-rust/) |
 | ws-go workspace | [./ws-go/](./ws-go/) |
 | ws-node workspace | [./ws-node/](./ws-node/) |
+| ws-zig workspace | [./ws-zig/](./ws-zig/) |
+| ws-lua workspace | [./ws-lua/](./ws-lua/) |
 | ws-k8s workspace | [./ws-k8s/](./ws-k8s/) |
 
 ---
