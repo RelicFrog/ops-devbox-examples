@@ -11,11 +11,13 @@
 # Run:   docker run --rm primes-rust:latest check 97
 
 # ---------------------------------------------------------------------------
-# Stage 1: builder
+# Stage 1: builder — dynamic musl binary (Alpine libc)
 # ---------------------------------------------------------------------------
-FROM rust:1.96-slim AS builder
+FROM rust:1.96-alpine AS builder
 
 WORKDIR /build
+
+RUN apk add --no-cache musl-dev
 
 # Cache dependencies separately from source
 COPY Cargo.toml ./
@@ -31,9 +33,9 @@ RUN touch src/main.rs src/lib.rs && \
     cargo build --release
 
 # ---------------------------------------------------------------------------
-# Stage 2: runtime — busybox:static für Shell + sleep Loop
+# Stage 2: runtime — alpine (provides musl libc for the binary)
 # ---------------------------------------------------------------------------
-FROM busybox:stable-musl AS runtime
+FROM alpine:3.21 AS runtime
 
 LABEL org.opencontainers.image.title="primes-cli (Rust)"
 LABEL org.opencontainers.image.description="Prime number generator CLI — ws-rust devbox workshop example"
@@ -46,4 +48,4 @@ COPY --from=builder /build/target/release/primes-cli /primes-cli
 # Default: keep the container alive for kubectl exec invocations.
 # Override ENTRYPOINT to run the CLI directly in one-shot mode.
 ENTRYPOINT ["/bin/sh", "-c"]
-CMD ["echo 'primes-rust ready'; while true; do sleep 3600; done"]
+CMD ["tail -f /dev/null"]

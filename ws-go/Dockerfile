@@ -24,7 +24,7 @@ COPY src ./src
 RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -o /primes-cli ./src/cmd/...
 
 # ---------------------------------------------------------------------------
-# Stage 2: runtime — busybox:static für Shell + sleep Loop
+# Stage 2: runtime — busybox:stable-musl (shell for kubectl exec)
 # ---------------------------------------------------------------------------
 FROM busybox:stable-musl AS runtime
 
@@ -37,4 +37,4 @@ LABEL org.opencontainers.image.source="https://github.com/RelicFrog/ops-devbox-e
 COPY --from=builder /primes-cli /primes-cli
 
 ENTRYPOINT ["/bin/sh", "-c"]
-CMD ["echo 'primes-go ready'; while true; do sleep 3600; done"]
+CMD ["tail -f /dev/null"]
