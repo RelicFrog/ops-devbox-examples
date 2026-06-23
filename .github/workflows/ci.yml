@@ -23,8 +23,6 @@ jobs:
     name: ws-go
     uses: ./.github/workflows/ci-ws-go.yml
 
-  # Placeholder for upcoming workspace (uncomment when ready):
-  #
-  # ws-node:
-  #   name: ws-node
-  #   uses: ./.github/workflows/ci-ws-node.yml
+  ws-node:
+    name: ws-node
+    uses: ./.github/workflows/ci-ws-node.yml

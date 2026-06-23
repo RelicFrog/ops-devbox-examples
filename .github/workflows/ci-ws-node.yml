@@ -1,0 +1,74 @@
+# Copyright 2026 TEAM RelicFrog
+# SPDX-License-Identifier: Apache-2.0
+#
+# .github/workflows/ci-ws-node.yml
+#
+# Reusable workflow wrapper for ws-node.
+# Called from the root CI pipeline (ci.yml) via `uses:`.
+
+name: ws-node (reusable)
+
+on:
+  workflow_call:
+
+env:
+  NODE_VERSION: "22.22.3"
+  NODE_NO_WARNINGS: "1"
+
+defaults:
+  run:
+    working-directory: ws-node
+
+jobs:
+  lint:
+    name: Lint (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install @types/node
+        run: npm install --save-dev @types/node
+
+      - name: Install Biome
+        run: npm install --save-dev --exact @biomejs/biome@2.4.16
+
+      - name: Biome check
+        run: npx biome check ./src ./tests
+
+      - name: TypeScript check
+        run: npx tsc --noEmit
+
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm install --save-dev @types/node tsx@4.21.0 typescript@5.9.3
+
+      - name: Run tests
+        run: npx tsx --test src/*.test.ts tests/*.test.ts

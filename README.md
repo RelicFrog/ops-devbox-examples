@@ -19,8 +19,8 @@ toolchain, build system, CI pipeline, and example application.
 | Workspace | Language | Application | CI | Status |
 |-----------|----------|-------------|-----|--------|
 | [`ws-rust`](./ws-rust/) | Rust 2024 | [`primes-cli`](./ws-rust/src/main.rs) — prime number generator | [![ws-rust CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-rust.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-rust.yml) | active |
-| [`ws-go`](./ws-go/) | Go 1.22.5 | [`primes-cli`](./ws-go/src/cmd/main.go) — prime number generator | [![ws-go CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-go.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-go.yml) | active |
-| `ws-node` | Node.js | TBD | — | planned |
+| [`ws-go`](./ws-go/) | Go 1.24.13 | [`primes-cli`](./ws-go/src/cmd/main.go) — prime number generator | [![ws-go CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-go.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-go.yml) | active |
+| [`ws-node`](./ws-node/) | Node.js 22 / TypeScript | [`primes-cli`](./ws-node/src/main.ts) — prime number generator | [![ws-node CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-node.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-node.yml) | active |
 
 ---
 
@@ -129,6 +129,9 @@ Push / PR to main
         └── ws-go (ci-ws-go.yml)
               ├── lint  — gofumpt -l + golangci-lint run
               └── test  — go build + go test -race
+        └── ws-node (ci-ws-node.yml)
+              ├── lint  — biome check + tsc --noEmit
+              └── test  — tsx --test
 ```
 
 Adding a new workspace requires only registering its reusable workflow in
@@ -145,6 +148,7 @@ Adding a new workspace requires only registering its reusable workflow in
 | Nixpkgs package search | <https://search.nixos.org/packages> |
 | ws-rust workspace | [./ws-rust/](./ws-rust/) |
 | ws-go workspace | [./ws-go/](./ws-go/) |
+| ws-node workspace | [./ws-node/](./ws-node/) |
 
 ---
 
