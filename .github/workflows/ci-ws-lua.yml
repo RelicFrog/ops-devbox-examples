@@ -1,0 +1,61 @@
+# Copyright 2026 TEAM RelicFrog
+# SPDX-License-Identifier: Apache-2.0
+#
+# .github/workflows/ci-ws-lua.yml — reusable wrapper for ws-lua.
+
+name: ws-lua (reusable)
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    working-directory: ws-lua
+
+jobs:
+  lint:
+    name: Lint (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install LuaJIT + luacheck (Ubuntu)
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y luajit lua-check
+      - name: Install LuaJIT + luacheck (macOS)
+        if: runner.os == 'macOS'
+        run: brew install luajit luacheck
+      - name: Install stylua
+        uses: taiki-e/install-action@v2
+        with:
+          tool: stylua
+      - name: Format check
+        run: stylua --check src/
+      - name: Lint
+        run: LUA_PATH="src/?.lua;;" luacheck src/ --no-unused-args
+
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install LuaJIT (Ubuntu)
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y luajit
+      - name: Install LuaJIT (macOS)
+        if: runner.os == 'macOS'
+        run: brew install luajit
+      - name: Unit tests
+        run: LUA_PATH="src/?.lua;;" luajit src/primes_test.lua
+      - name: Integration tests
+        run: LUA_PATH="src/?.lua;tests/?.lua;;" luajit tests/integration_test.lua

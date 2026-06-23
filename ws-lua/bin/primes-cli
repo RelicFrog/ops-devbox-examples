@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# ws-lua/bin/primes-cli — runs primes-cli via luajit.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export LUA_PATH="${SCRIPT_DIR}/../src/?.lua;;"
+exec luajit "${SCRIPT_DIR}/../src/main.lua" "$@"

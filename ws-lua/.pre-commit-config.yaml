@@ -1,0 +1,41 @@
+# Copyright 2026 TEAM RelicFrog
+# SPDX-License-Identifier: Apache-2.0
+#
+# ws-lua/.pre-commit-config.yaml
+
+default_install_hook_types:
+  - pre-commit
+
+default_stages:
+  - pre-commit
+
+fail_fast: false
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  - repo: local
+    hooks:
+      - id: stylua
+        name: stylua (check)
+        language: system
+        entry: stylua --check src/
+        types: [file]
+        files: \.lua$
+        pass_filenames: false
+
+      - id: luacheck
+        name: luacheck
+        language: system
+        entry: bash -c 'LUA_PATH="src/?.lua;;" luacheck src/ --no-unused-args'
+        types: [file]
+        files: \.lua$
+        pass_filenames: false
