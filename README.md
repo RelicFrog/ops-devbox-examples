@@ -29,7 +29,8 @@ callable like local commands.
 | [`ws-node`](./ws-node/) | Node.js 22 / TypeScript | [`primes-cli`](./ws-node/src/main.ts) — prime number generator | [![ws-node CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-node.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-node.yml) | active |
 | [`ws-zig`](./ws-zig/) | Zig 0.14.1 | [`primes-cli`](./ws-zig/src/main.zig) — comptime sieve + prime generator | [![ws-zig CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-zig.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-zig.yml) | active |
 | [`ws-lua`](./ws-lua/) | LuaJIT 2.1 | [`primes-cli`](./ws-lua/src/main.lua) — prime number generator | [![ws-lua CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-lua.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-lua.yml) | active |
-| [`ws-k8s`](./ws-k8s/) | Kubernetes / OrbStack | Containerised `primes-cli` for all five languages + `kubectl exec` wrappers | — | active |
+| [`ws-python`](./ws-python/) | Python 3.13 | [`primes-cli`](./ws-python/src/primes_cli/main.py) — prime number generator | [![ws-python CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-python.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-python.yml) | active |
+| [`ws-k8s`](./ws-k8s/) | Kubernetes / OrbStack | Containerised `primes-cli` for all six languages + `kubectl exec` wrappers | — | active |
 
 ---
 
@@ -233,6 +234,9 @@ Push / PR to main
         └── ws-lua (ci-ws-lua.yml)
               ├── lint  — stylua --check + luacheck
               └── test  — luajit primes_test.lua + integration_test.lua
+        └── ws-python (ci-ws-python.yml)
+              ├── lint  — ruff format-check + ruff lint + mypy
+              └── test  — pytest src/ tests/
 ```
 
 > `ws-k8s` has no CI workflow — it requires a live OrbStack cluster and
@@ -254,6 +258,7 @@ Push / PR to main
 | ws-node workspace | [./ws-node/](./ws-node/) |
 | ws-zig workspace | [./ws-zig/](./ws-zig/) |
 | ws-lua workspace | [./ws-lua/](./ws-lua/) |
+| ws-python workspace | [./ws-python/](./ws-python/) |
 | ws-k8s workspace | [./ws-k8s/](./ws-k8s/) |
 
 ---

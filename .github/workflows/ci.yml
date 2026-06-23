@@ -34,3 +34,7 @@ jobs:
   ws-lua:
     name: ws-lua
     uses: ./.github/workflows/ci-ws-lua.yml
+
+  ws-python:
+    name: ws-python
+    uses: ./.github/workflows/ci-ws-python.yml

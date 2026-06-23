@@ -12,12 +12,12 @@
 .DEFAULT_GOAL := help
 
 .PHONY: help \
-        build-all build-rust build-go build-node build-zig build-lua \
+        build-all build-rust build-go build-node build-zig build-lua build-python \
         namespace \
-        deploy-all deploy-rust deploy-go deploy-node deploy-zig deploy-lua \
+        deploy-all deploy-rust deploy-go deploy-node deploy-zig deploy-lua deploy-python \
         teardown status \
-        logs-rust logs-go logs-node logs-zig logs-lua \
-        exec-rust exec-go exec-node exec-zig exec-lua \
+        logs-rust logs-go logs-node logs-zig logs-lua logs-python \
+        exec-rust exec-go exec-node exec-zig exec-lua exec-python \
         audit-images info clean
 
 NS       := primes-workshop
@@ -25,7 +25,8 @@ IMG_RUST := primes-rust:latest
 IMG_GO   := primes-go:latest
 IMG_NODE := primes-node:latest
 IMG_ZIG  := primes-zig:latest
-IMG_LUA  := primes-lua:latest
+IMG_LUA    := primes-lua:latest
+IMG_PYTHON := primes-python:latest
 ROOT     := $(shell cd .. && pwd)
 
 # ---------------------------------------------------------------------------
@@ -55,9 +56,13 @@ build-zig: ## docker buildx build — primes-zig:latest
 	$(MAKE) -C $(ROOT)/ws-zig docker-build
 
 build-lua: ## docker buildx build — primes-lua:latest
+
+build-python: ## docker buildx build — primes-python:latest
+	$(MAKE) -C $(ROOT)/ws-python docker-build
+
 	$(MAKE) -C $(ROOT)/ws-lua docker-build
 
-build-all: build-rust build-go build-node build-zig build-lua ## build all five images
+build-all: build-rust build-go build-node build-zig build-lua build-python ## build all six images
 
 # ---------------------------------------------------------------------------
 # Deploy to local OrbStack k8s cluster
@@ -81,14 +86,20 @@ deploy-zig: namespace ## kubectl apply — primes-zig deployment
 	kubectl apply -f manifests/zig/deployment.yaml
 
 deploy-lua: namespace ## kubectl apply — primes-lua deployment
-	kubectl apply -f manifests/lua/deployment.yaml
 
-deploy-all: namespace ## deploy all five apps and wait for Ready
+deploy-python: namespace ## kubectl apply — primes-python deployment
+	kubectl apply -f manifests/python/deployment.yaml
+
+	kubectl apply -f manifests/lua/deployment.yaml
+	kubectl apply -f manifests/python/deployment.yaml
+
+deploy-all: namespace ## deploy all six apps and wait for Ready
 	kubectl apply -f manifests/rust/deployment.yaml
 	kubectl apply -f manifests/go/deployment.yaml
 	kubectl apply -f manifests/node/deployment.yaml
 	kubectl apply -f manifests/zig/deployment.yaml
 	kubectl apply -f manifests/lua/deployment.yaml
+	kubectl apply -f manifests/python/deployment.yaml
 	@echo ""
 	@echo "Waiting for pods to be ready..."
 	kubectl wait --namespace $(NS) --for=condition=Ready pod --selector=app=primes-rust --timeout=90s || true
@@ -96,6 +107,7 @@ deploy-all: namespace ## deploy all five apps and wait for Ready
 	kubectl wait --namespace $(NS) --for=condition=Ready pod --selector=app=primes-node --timeout=90s || true
 	kubectl wait --namespace $(NS) --for=condition=Ready pod --selector=app=primes-zig  --timeout=90s || true
 	kubectl wait --namespace $(NS) --for=condition=Ready pod --selector=app=primes-lua  --timeout=90s || true
+	kubectl wait --namespace $(NS) --for=condition=Ready pod --selector=app=primes-python --timeout=90s || true
 	@echo ""
 	$(MAKE) status
 
@@ -133,6 +145,10 @@ logs-zig: ## stern logs — primes-zig pods
 	stern --namespace $(NS) --selector app=primes-zig --tail 50
 
 logs-lua: ## stern logs — primes-lua pods
+
+logs-python: ## stern logs — primes-python pods
+	stern --namespace $(NS) --selector app=primes-python --tail 50
+
 	stern --namespace $(NS) --selector app=primes-lua --tail 50
 
 # ---------------------------------------------------------------------------
@@ -160,6 +176,12 @@ exec-zig: ## kubectl exec — primes-zig pod (ARGS='check 97')
 	  -- /primes-cli $(ARGS)
 
 exec-lua: ## kubectl exec — primes-lua pod (ARGS='nth 10')
+
+exec-python: ## kubectl exec — primes-python pod (ARGS='nth 10')
+	kubectl exec --namespace $(NS) \
+	  $$(kubectl get pod --namespace $(NS) -l app=primes-python -o jsonpath='{.items[0].metadata.name}') \
+	  -- /usr/local/bin/primes-cli $(ARGS)
+
 	kubectl exec --namespace $(NS) \
 	  $$(kubectl get pod --namespace $(NS) -l app=primes-lua -o jsonpath='{.items[0].metadata.name}') \
 	  -- /usr/local/bin/primes-cli $(ARGS)
@@ -168,12 +190,13 @@ exec-lua: ## kubectl exec — primes-lua pod (ARGS='nth 10')
 # Security scan
 # ---------------------------------------------------------------------------
 
-audit-images: ## trivy HIGH/CRITICAL scan — all five primes images
+audit-images: ## trivy HIGH/CRITICAL scan — all six primes images
 	trivy image --severity HIGH,CRITICAL $(IMG_RUST)
 	trivy image --severity HIGH,CRITICAL $(IMG_GO)
 	trivy image --severity HIGH,CRITICAL $(IMG_NODE)
 	trivy image --severity HIGH,CRITICAL $(IMG_ZIG)
 	trivy image --severity HIGH,CRITICAL $(IMG_LUA)
+	trivy image --severity HIGH,CRITICAL $(IMG_PYTHON)
 
 # ---------------------------------------------------------------------------
 # Cleanup / Info

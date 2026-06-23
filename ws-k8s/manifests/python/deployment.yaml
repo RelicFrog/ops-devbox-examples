@@ -1,0 +1,42 @@
+# Copyright 2026 TEAM RelicFrog
+# SPDX-License-Identifier: Apache-2.0
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: primes-python
+  namespace: primes-workshop
+  labels:
+    app: primes-python
+    lang: python
+    example: devbox-workshop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: primes-python
+  template:
+    metadata:
+      labels:
+        app: primes-python
+        lang: python
+    spec:
+      containers:
+        - name: primes-python
+          image: primes-python:latest
+          imagePullPolicy: Never
+          env:
+            - name: PYTHONPATH
+              value: /app/src
+            - name: PYTHONUNBUFFERED
+              value: "1"
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "32Mi"
+            limits:
+              cpu: "200m"
+              memory: "96Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
