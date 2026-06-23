@@ -82,8 +82,8 @@ deploy-all: namespace ## deploy all three apps and wait for Ready
 # Teardown
 # ---------------------------------------------------------------------------
 
-teardown: ## delete all primes-* deployments and the namespace
-	kubectl delete namespace $(NS) --ignore-not-found
+teardown: ## delete all primes-* deployments and the namespace (force, no grace period)
+	kubectl delete namespace $(NS) --ignore-not-found --grace-period=0 --force
 
 # ---------------------------------------------------------------------------
 # Status
