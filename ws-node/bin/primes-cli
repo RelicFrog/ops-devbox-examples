@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# ws-node/bin/primes-cli — wrapper that runs the TypeScript CLI via tsx.
+# Available inside devbox shell (tsx is on PATH from Nix packages).
+exec tsx "$(dirname "${BASH_SOURCE[0]}")/../src/main.ts" "$@"
