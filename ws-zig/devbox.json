@@ -1,0 +1,49 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.14.2/.schema/devbox.schema.json",
+  "env": {
+    "PATH":                        "$PATH:$PWD/bin",
+    "C_DBX_META_TEAM":             "RelicFrog",
+    "C_DBX_META_PROJECT_ID":       "ops-devbox-examples/ws-zig",
+    "C_DBX_META_VERSION":          "1",
+    "POWERLEVEL9K_INSTANT_PROMPT": "quiet"
+  },
+  "shell": {
+    "init_hook": [
+      "scripts/devbox/dbx_init.sh",
+      "pre-commit install --install-hooks 2>/dev/null || true"
+    ],
+    "scripts": {
+      "build": ["make build"],
+      "check": ["make check"],
+      "fmt":   ["make fmt"],
+      "lint":  ["make lint"],
+      "test":  ["make test"],
+      "clean": ["make clean"],
+      "run":   ["primes-cli \"$@\""],
+      "info": [
+        "echo '--- ws-zig devbox workspace ---'",
+        "echo \"Zig:         $(zig version 2>/dev/null || echo 'not available')\"",
+        "echo \"zls:         $(zls --version 2>/dev/null || echo 'not available')\"",
+        "echo \"Make:        $(make --version 2>/dev/null | head -1 || echo 'not available')\"",
+        "echo \"Git:         $(git --version)\"",
+        "echo \"Platform:    $(uname -ms)\""
+      ],
+      "docs": ["glow --pager README.md"]
+    }
+  },
+  "packages": {
+    "zls":        "0.14.0",
+    "git":        "2.54.0",
+    "gh":         "2.52.0",
+    "jq":         "1.8.1",
+    "curl":       "8.17.0",
+    "ripgrep":    "14.1.0",
+    "fd":         "10.4.2",
+    "bat":        "0.24.0",
+    "glow":       "2.1.2",
+    "gitleaks":   "8.30.1",
+    "gnumake":    "4.4.1",
+    "pre-commit": "4.5.1",
+    "zig":        "0.14.1"
+  }
+}
