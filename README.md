@@ -4,11 +4,17 @@
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
 [![Devbox](https://img.shields.io/badge/devbox-ready-5C5CFF?logo=nixos&logoColor=white)](https://www.jetify.com/devbox)
 [![Platform](https://img.shields.io/badge/platform-macOS%20ARM64-lightgrey?logo=apple)](https://developer.apple.com/silicon/)
+[![Kubernetes](https://img.shields.io/badge/kubernetes-OrbStack-326CE5?logo=kubernetes&logoColor=white)](https://orbstack.dev/kubernetes)
 
 Reference workspace collection demonstrating reproducible, hermetic developer
 environments using [Devbox](https://www.jetify.com/devbox) across multiple
-language ecosystems. Each workspace is fully self-contained with its own
-toolchain, build system, CI pipeline, and example application.
+language ecosystems and runtimes. Each workspace is fully self-contained with
+its own toolchain, build system, CI pipeline, and example application.
+
+The fourth workspace (`ws-k8s`) goes one step further: it containerises all
+three CLI applications and deploys them to a local Kubernetes cluster
+(OrbStack), providing `kubectl exec` wrappers that make in-pod binaries
+callable like local commands.
 
 **Primary target platform:** macOS Apple Silicon (`aarch64-darwin`).
 
@@ -16,12 +22,12 @@ toolchain, build system, CI pipeline, and example application.
 
 ## Workspaces
 
-| Workspace | Language | Application | CI | Status |
-|-----------|----------|-------------|-----|--------|
+| Workspace | Language / Stack | Application | CI | Status |
+|-----------|-----------------|-------------|-----|--------|
 | [`ws-rust`](./ws-rust/) | Rust 2024 | [`primes-cli`](./ws-rust/src/main.rs) — prime number generator | [![ws-rust CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-rust.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-rust.yml) | active |
 | [`ws-go`](./ws-go/) | Go 1.24.13 | [`primes-cli`](./ws-go/src/cmd/main.go) — prime number generator | [![ws-go CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-go.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-go.yml) | active |
 | [`ws-node`](./ws-node/) | Node.js 22 / TypeScript | [`primes-cli`](./ws-node/src/main.ts) — prime number generator | [![ws-node CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-node.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-node.yml) | active |
-| [`ws-k8s`](./ws-k8s/) | Kubernetes / OrbStack | kubectl exec wrappers for all three primes-cli images | — | active |
+| [`ws-k8s`](./ws-k8s/) | Kubernetes / OrbStack | Containerised `primes-cli` for Rust, Go, Node.js + `kubectl exec` wrappers | — | active |
 
 ---
 
@@ -29,29 +35,51 @@ toolchain, build system, CI pipeline, and example application.
 
 ### Prerequisites
 
-| Tool | Version | Install |
-|------|---------|---------|
-| [Devbox](https://www.jetify.com/devbox) | >= 0.13 | `curl -fsSL https://get.jetify.com/devbox \| bash` |
-| [Nix](https://nixos.org/download) | any | installed automatically by Devbox |
-| macOS + Apple Silicon | — | primary development platform |
+| Tool | Required for | Install |
+|------|-------------|---------|
+| [Devbox](https://www.jetify.com/devbox) >= 0.13 | all workspaces | `curl -fsSL https://get.jetify.com/devbox \| bash` |
+| [Nix](https://nixos.org/download) | all workspaces | installed automatically by Devbox |
+| macOS + Apple Silicon | primary platform | — |
+| [OrbStack](https://orbstack.dev) | `ws-k8s` only | download from orbstack.dev |
+| Kubernetes enabled in OrbStack | `ws-k8s` only | Settings → Kubernetes → Enable |
 
-### Quick start
+### Quick start — language workspaces
 
 ```bash
-# Clone the repository
 git clone https://github.com/RelicFrog/ops-devbox-examples.git
 cd ops-devbox-examples
 
-# Enter a workspace — Devbox installs all tooling on first run
-cd ws-rust
+# Enter any workspace — Devbox installs all tooling on first run
+cd ws-rust        # or ws-go / ws-node
 devbox shell
 
-# Run tasks directly without entering the shell
-devbox run build    # cargo build --release
-devbox run test     # cargo nextest run --all
-devbox run check    # fmt-check + clippy + tests
-devbox run lint     # cargo clippy -D warnings
-devbox run clean    # cargo clean
+# Common tasks (identical across all three workspaces)
+make              # show available targets
+make build        # compile the application
+make check        # full quality gate (fmt + lint + test)
+make test         # run tests only
+make audit        # dependency security scan
+```
+
+### Quick start — Kubernetes workspace
+
+```bash
+cd ws-k8s
+devbox shell
+
+# 1. Build all three container images (requires Docker / OrbStack)
+make build-all
+
+# 2. Deploy to local OrbStack cluster
+make deploy-all
+
+# 3. Call the in-pod CLIs via kubectl exec wrappers (on PATH in devbox shell)
+primes-rust check 97
+primes-go   nth 100
+primes-node list --to 20
+
+# 4. Tear down
+make teardown
 ```
 
 ---
@@ -62,37 +90,50 @@ devbox run clean    # cargo clean
 ops-devbox-examples/
 ├── .github/
 │   └── workflows/
-│       ├── ci.yml              # Root pipeline — delegates to workspace sub-workflows
-│       └── ci-ws-rust.yml      # Reusable workflow: ws-rust lint + test
-├── ws-rust/                    # Rust 2024 workspace (active)
-│   ├── devbox.json             # Pinned Nix packages, devbox run scripts
-│   ├── Makefile                # Build targets via gnumake (Nix, not system make)
+│       ├── ci.yml              # Root pipeline — calls all workspace sub-workflows
+│       ├── ci-ws-rust.yml      # Reusable: ws-rust lint + test
+│       ├── ci-ws-go.yml        # Reusable: ws-go lint + test
+│       └── ci-ws-node.yml      # Reusable: ws-node lint + test
+├── ws-rust/                    # Rust 2024 workspace
+│   ├── devbox.json             # Pinned Nix packages + devbox run scripts
+│   ├── Makefile                # build / check / fmt / lint / test / audit / clean / docker-build
+│   ├── Dockerfile              # Multi-stage: rust:alpine builder → alpine:3.21 runtime
+│   ├── deny.toml               # cargo-deny licence + vulnerability policy
 │   ├── rust-toolchain.toml     # Stable toolchain, aarch64-apple-darwin
-│   ├── src/                    # primes-cli source
+│   ├── src/                    # primes-cli source (lib.rs + main.rs + primes.rs)
 │   ├── tests/                  # Integration tests
-│   └── scripts/devbox/         # Init hook, preflight checks, OS overrides
-├── ws-go/                      # Go 1.24 workspace (active)
+│   └── scripts/devbox/         # Init hook, preflight matrix, OS overrides
+├── ws-go/                      # Go 1.24.13 workspace
 │   ├── devbox.json             # Pinned Nix packages (go, gofumpt, golangci-lint, …)
-│   ├── Makefile                # Build targets via gnumake
+│   ├── Makefile                # build / check / fmt / lint / test / audit / clean / docker-build
+│   ├── Dockerfile              # Multi-stage: golang:alpine builder → busybox:musl runtime
 │   ├── go.mod                  # Module: github.com/RelicFrog/ops-devbox-examples/ws-go
-│   ├── src/                    # primes-cli source (package primes + cmd/)
+│   ├── src/                    # primes-cli source (primes.go + cmd/main.go)
 │   ├── tests/                  # Integration tests
-│   └── scripts/devbox/         # Init hook, preflight checks, OS overrides
-├── ws-node/                    # Node.js 22 / TypeScript workspace (active)
+│   └── scripts/devbox/         # Init hook, preflight matrix, OS overrides
+├── ws-node/                    # Node.js 22 / TypeScript workspace
 │   ├── devbox.json             # Pinned Nix packages (nodejs, typescript, tsx, biome, …)
-│   ├── Makefile                # Build targets via gnumake
-│   ├── tsconfig.json           # Strict TypeScript configuration
+│   ├── Makefile                # build / check / fmt / lint / test / audit / clean / docker-build
+│   ├── Dockerfile              # Multi-stage: node:22-alpine builder → node:22-alpine runtime
+│   ├── tsconfig.json           # Strict TypeScript, ES2022, NodeNext
 │   ├── biome.json              # Formatter + linter configuration
-│   ├── bin/primes-cli          # Shell wrapper — runs tsx src/main.ts directly
+│   ├── bin/primes-cli          # Shell wrapper — runs tsx src/main.ts directly (no build needed)
 │   ├── src/                    # primes-cli source (primes.ts + main.ts)
 │   ├── tests/                  # Integration tests
-│   └── scripts/devbox/         # Init hook, preflight checks, OS overrides
-├── ws-k8s/                     # Kubernetes workspace (active — requires OrbStack)
-│   ├── devbox.json             # Pinned tools: kubectl, k9s, helm, kustomize, stern, trivy, …
-│   ├── Makefile                # build-all / deploy-all / exec-* / teardown
-│   ├── bin/                    # kubectl exec wrappers: primes-{rust,go,node}
-│   └── manifests/              # Raw YAML: namespace + deployments per language
+│   └── scripts/devbox/         # Init hook, preflight matrix, OS overrides
+├── ws-k8s/                     # Kubernetes workspace (requires OrbStack)
+│   ├── devbox.json             # kubectl, k9s, helm, kustomize, stern, trivy, yq-go, …
+│   ├── Makefile                # build-all / deploy-all / exec-* / logs-* / teardown / info
+│   ├── bin/                    # kubectl exec wrappers: primes-rust, primes-go, primes-node
+│   ├── manifests/              # Raw YAML: namespace + Deployments (imagePullPolicy: Never)
+│   │   ├── rust/               # namespace.yaml + deployment.yaml
+│   │   ├── go/                 # deployment.yaml
+│   │   └── node/               # deployment.yaml
+│   └── scripts/devbox/         # Init hook, cluster reachability check, Docker daemon check
 ├── LICENSE                     # Apache-2.0
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── SECURITY.md
 └── README.md
 ```
 
@@ -102,7 +143,7 @@ ops-devbox-examples/
 
 ### devbox run ↔ make
 
-All `devbox run` targets that correspond to a Makefile target delegate directly
+All `devbox run` targets in the language workspaces delegate directly
 to `make <target>`. Both invocation styles are equivalent:
 
 ```bash
@@ -113,31 +154,63 @@ devbox run lint    # == make lint
 devbox run test    # == make test
 devbox run audit   # == make audit
 devbox run clean   # == make clean
+devbox run docs    # glow --pager README.md  (no make equivalent)
+devbox run info    # print tool versions     (no make equivalent)
+devbox run run     # run binary directly     (no make equivalent)
 ```
 
-Targets without a Makefile equivalent (e.g. `run`, `info`) are devbox-only
-scripts defined directly in `devbox.json`.
+The `ws-k8s` workspace follows the same `make <target>` pattern but
+exposes a different set of targets (`build-all`, `deploy-all`, `exec-*`,
+`teardown`, …) that operate at the cluster level rather than the source level.
+
+### make without arguments
+
+Every workspace defines `.DEFAULT_GOAL := help`. Running `make` without
+arguments prints the self-documenting help derived from `##` comments:
+
+```bash
+make        # shows all targets with descriptions
+make info   # prints tool versions for the current workspace
+```
+
+### Container images
+
+Each language workspace produces a container image via `make docker-build`.
+Images use multi-stage builds and are loaded directly into the local
+OrbStack Docker context (`--load`). No registry push is required.
+
+| Image | Base (runtime) | Binary |
+|-------|---------------|--------|
+| `primes-rust:latest` | `alpine:3.21` | `/primes-cli` |
+| `primes-go:latest` | `busybox:stable-musl` | `/primes-cli` |
+| `primes-node:latest` | `node:22-alpine` | `/usr/local/bin/primes-cli` |
+
+All containers use `tail -f /dev/null` as their keep-alive mechanism so
+they remain running for `kubectl exec` invocations without CPU overhead.
 
 ### Platform package exclusions
 
 Packages unavailable on macOS are excluded via the `platforms` field in
-`devbox.json`. Example: `mold` (Linux-only fast linker) is listed with
-`"platforms": ["x86_64-linux", "aarch64-linux"]` so it is never installed
-on Darwin.
+`devbox.json`. Example: `mold` (Linux-only fast linker):
+
+```json
+"mold": {
+  "version": "2.41.0",
+  "platforms": ["x86_64-linux", "aarch64-linux"]
+}
+```
 
 ### Devbox init hook
 
-Each workspace runs `scripts/devbox/dbx_init.sh` on `devbox shell` entry.
-The script performs preflight checks and renders a status matrix covering all
-toolchain components, build tools, and security utilities. OS-specific
-environment adjustments (linker flags, compiler cache) are loaded from
-`scripts/devbox/init/os_<platform>/override.sh`.
+Each workspace runs `scripts/devbox/dbx_init.sh` on `devbox shell` entry
+and displays a preflight status matrix. The `ws-k8s` init hook additionally
+checks Docker daemon reachability and cluster connectivity.
 
 ---
 
 ## CI pipeline
 
-The root workflow (`.github/workflows/ci.yml`) calls each workspace's
+The root workflow (`.github/workflows/ci.yml`) calls each language workspace
 sub-workflow as a reusable job. Matrix: `ubuntu-latest` + `macos-latest`.
 
 ```
@@ -146,16 +219,17 @@ Push / PR to main
         ├── ws-rust (ci-ws-rust.yml)
         │     ├── lint  — cargo fmt --check + cargo clippy -D warnings
         │     └── test  — cargo build + cargo nextest run --all
-        └── ws-go (ci-ws-go.yml)
-              ├── lint  — gofumpt -l + golangci-lint run
-              └── test  — go build + go test -race
+        ├── ws-go (ci-ws-go.yml)
+        │     ├── lint  — gofumpt -l + golangci-lint run
+        │     └── test  — go build + go test -race
         └── ws-node (ci-ws-node.yml)
               ├── lint  — biome check + tsc --noEmit
               └── test  — tsx --test
 ```
 
-Adding a new workspace requires only registering its reusable workflow in
-`ci.yml`. No changes to existing workflows needed.
+> `ws-k8s` has no CI workflow — it requires a live OrbStack cluster and
+> locally built images, which are not available in standard GitHub Actions
+> runners. Validation is done locally via `make build-all && make deploy-all`.
 
 ---
 
@@ -166,6 +240,7 @@ Adding a new workspace requires only registering its reusable workflow in
 | Devbox documentation | <https://www.jetify.com/devbox/docs/> |
 | Devbox package search | <https://www.jetify.com/devbox/docs/devbox_packages/> |
 | Nixpkgs package search | <https://search.nixos.org/packages> |
+| OrbStack (local k8s) | <https://orbstack.dev> |
 | ws-rust workspace | [./ws-rust/](./ws-rust/) |
 | ws-go workspace | [./ws-go/](./ws-go/) |
 | ws-node workspace | [./ws-node/](./ws-node/) |

@@ -15,7 +15,7 @@
         namespace deploy-all deploy-rust deploy-go deploy-node \
         teardown status logs-rust logs-go logs-node \
         exec-rust exec-go exec-node \
-        images-load audit-images clean
+        audit-images info clean
 
 NS        := primes-workshop
 IMG_RUST  := primes-rust:latest
@@ -141,3 +141,19 @@ audit-images: ## trivy image scan — all three primes images
 # ---------------------------------------------------------------------------
 
 clean: teardown ## teardown k8s resources (alias)
+
+# ---------------------------------------------------------------------------
+# Info
+# ---------------------------------------------------------------------------
+
+info: ## print workspace tool versions
+	@echo '--- ws-k8s devbox workspace ---'
+	@echo "kubectl:    $$(kubectl version --client --short 2>/dev/null || kubectl version --client 2>/dev/null | head -1)"
+	@echo "k9s:        $$(k9s version --short 2>/dev/null | head -1 || echo 'n/a')"
+	@echo "helm:       $$(helm version --short 2>/dev/null || echo 'n/a')"
+	@echo "kustomize:  $$(kustomize version 2>/dev/null | head -1 || echo 'n/a')"
+	@echo "stern:      $$(stern --version 2>/dev/null | head -1 || echo 'n/a')"
+	@echo "trivy:      $$(trivy --version 2>/dev/null | head -1 || echo 'n/a')"
+	@echo "docker:     $$(docker version --format '{{.Client.Version}}' 2>/dev/null || echo 'n/a (host service)')"
+	@echo "context:    $$(kubectl config current-context 2>/dev/null || echo 'none')"
+	@echo "Platform:   $$(uname -ms)"
