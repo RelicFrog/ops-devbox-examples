@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# ws-python/bin/primes-cli — runs primes-cli via Nix Python.
+# Python interpreter comes directly from the Nix store (devbox package).
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PYTHONPATH="${SCRIPT_DIR}/../src"
+exec python -m primes_cli "$@"

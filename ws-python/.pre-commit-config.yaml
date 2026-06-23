@@ -1,0 +1,47 @@
+# Copyright 2026 TEAM RelicFrog
+# SPDX-License-Identifier: Apache-2.0
+#
+# ws-python/.pre-commit-config.yaml
+
+default_install_hook_types:
+  - pre-commit
+
+default_stages:
+  - pre-commit
+
+fail_fast: false
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  - repo: local
+    hooks:
+      - id: ruff-format
+        name: ruff format (check)
+        language: system
+        entry: ruff format --check src/ tests/
+        types: [python]
+        pass_filenames: false
+
+      - id: ruff-lint
+        name: ruff lint
+        language: system
+        entry: ruff check src/ tests/
+        types: [python]
+        pass_filenames: false
+
+      - id: mypy
+        name: mypy
+        language: system
+        entry: mypy src/
+        types: [python]
+        pass_filenames: false
