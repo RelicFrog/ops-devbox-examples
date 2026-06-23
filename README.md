@@ -96,13 +96,17 @@ ops-devbox-examples/
 │       ├── ci.yml              # Root pipeline — calls all workspace sub-workflows
 │       ├── ci-ws-rust.yml      # Reusable: ws-rust lint + test
 │       ├── ci-ws-go.yml        # Reusable: ws-go lint + test
-│       └── ci-ws-node.yml      # Reusable: ws-node lint + test
+│       ├── ci-ws-node.yml      # Reusable: ws-node lint + test
+│       ├── ci-ws-zig.yml       # Reusable: ws-zig fmt-check + build + test
+│       ├── ci-ws-lua.yml       # Reusable: ws-lua lint + test
+│       └── ci-ws-python.yml    # Reusable: ws-python lint + test
 ├── ws-rust/                    # Rust 2024 workspace
 │   ├── devbox.json             # Pinned Nix packages + devbox run scripts
 │   ├── Makefile                # build / check / fmt / lint / test / audit / clean / docker-build
 │   ├── Dockerfile              # Multi-stage: rust:alpine builder → alpine:3.21 runtime
 │   ├── deny.toml               # cargo-deny licence + vulnerability policy
 │   ├── rust-toolchain.toml     # Stable toolchain, aarch64-apple-darwin
+│   ├── bin/primes-cli          # Shell wrapper — auto-builds if needed
 │   ├── src/                    # primes-cli source (lib.rs + main.rs + primes.rs)
 │   ├── tests/                  # Integration tests
 │   └── scripts/devbox/         # Init hook, preflight matrix, OS overrides
@@ -111,6 +115,7 @@ ops-devbox-examples/
 │   ├── Makefile                # build / check / fmt / lint / test / audit / clean / docker-build
 │   ├── Dockerfile              # Multi-stage: golang:alpine builder → busybox:musl runtime
 │   ├── go.mod                  # Module: github.com/RelicFrog/ops-devbox-examples/ws-go
+│   ├── bin/primes-cli          # Shell wrapper — runs go binary directly
 │   ├── src/                    # primes-cli source (primes.go + cmd/main.go)
 │   ├── tests/                  # Integration tests
 │   └── scripts/devbox/         # Init hook, preflight matrix, OS overrides
@@ -124,15 +129,39 @@ ops-devbox-examples/
 │   ├── src/                    # primes-cli source (primes.ts + main.ts)
 │   ├── tests/                  # Integration tests
 │   └── scripts/devbox/         # Init hook, preflight matrix, OS overrides
+├── ws-zig/                     # Zig 0.14.1 workspace — comptime prime sieve
+│   ├── devbox.json             # Pinned Nix packages (zig, zls, …)
+│   ├── Makefile                # build / check / fmt / lint / test / clean / docker-build
+│   ├── Dockerfile              # zig:0.13 builder → alpine:3.21 runtime
+│   ├── build.zig               # Zig build script (used in CI / Linux)
+│   ├── bin/primes-cli          # Shell wrapper — auto-builds if needed
+│   ├── src/                    # primes.zig (comptime sieve) + main.zig + integration_test.zig
+│   └── scripts/devbox/         # Init hook, preflight matrix, OS overrides
+├── ws-lua/                     # LuaJIT 2.1 workspace — interpreted, no build step
+│   ├── devbox.json             # Pinned Nix packages (luajit, luacheck, stylua, …)
+│   ├── Makefile                # check / fmt / lint / test / docker-build
+│   ├── Dockerfile              # alpine:3.21 + apk luajit + src/
+│   ├── bin/primes-cli          # Shell wrapper — LUA_PATH + luajit src/main.lua
+│   ├── src/                    # primes.lua + main.lua + primes_test.lua
+│   ├── tests/                  # integration_test.lua
+│   └── scripts/devbox/         # Init hook, preflight matrix, OS overrides
+├── ws-python/                  # Python 3.13 workspace — all tooling from Nix
+│   ├── devbox.json             # Pinned Nix packages (python, pytest, ruff, mypy, uv, …)
+│   ├── Makefile                # check / fmt / lint / test / audit / clean / docker-build
+│   ├── Dockerfile              # python:3.13-alpine + src/ (no compilation)
+│   ├── pyproject.toml          # ruff + mypy + pytest configuration
+│   ├── bin/primes-cli          # Shell wrapper — PYTHONPATH + python -m primes_cli
+│   ├── src/primes_cli/         # primes.py + main.py + __main__.py
+│   ├── tests/                  # integration_test.py
+│   └── scripts/devbox/         # Init hook, preflight matrix, OS overrides
 ├── ws-k8s/                     # Kubernetes workspace (requires OrbStack)
 │   ├── devbox.json             # kubectl, k9s, helm, kustomize, stern, trivy, yq-go, …
 │   ├── Makefile                # build-all / deploy-all / exec-* / logs-* / teardown / info
-│   ├── bin/                    # kubectl exec wrappers: primes-rust, primes-go, primes-node
+│   ├── bin/                    # kubectl exec wrappers: primes-{rust,go,node,zig,lua,python}
 │   ├── manifests/              # Raw YAML: namespace + Deployments (imagePullPolicy: Never)
-│   │   ├── rust/               # namespace.yaml + deployment.yaml
-│   │   ├── go/                 # deployment.yaml
-│   │   └── node/               # deployment.yaml
-│   └── scripts/devbox/         # Init hook, cluster reachability check, Docker daemon check
+│   │   ├── rust/ go/ node/     # deployment.yaml per language
+│   │   ├── zig/ lua/ python/   # deployment.yaml per language
+│   └── scripts/devbox/         # Init hook, cluster + Docker daemon check
 ├── LICENSE                     # Apache-2.0
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md

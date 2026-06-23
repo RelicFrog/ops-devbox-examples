@@ -1,5 +1,6 @@
 # ws-lua — primes-cli
 
+[![ws-lua CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-lua.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-lua.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](../LICENSE)
 [![Lua](https://img.shields.io/badge/LuaJIT-2.1-2C2D72?logo=lua&logoColor=white)](https://luajit.org)
 [![Devbox](https://img.shields.io/badge/devbox-ready-5C5CFF?logo=nixos&logoColor=white)](https://www.jetify.com/devbox)
@@ -114,6 +115,17 @@ ws-lua/
 
 ## Devbox environment
 
+### Toolchain origin
+
+All tooling comes directly from the Nix store via devbox. No system Lua,
+no luarocks, no manual installation required:
+
+```
+.devbox/nix/profile/default/bin/luajit     ← Nix store (luajit@2.1)
+.devbox/nix/profile/default/bin/luacheck   ← Nix store (lua51Packages.luacheck@1.2.0-1)
+.devbox/nix/profile/default/bin/stylua     ← Nix store (stylua@2.5.2)
+```
+
 ### Pinned packages
 
 | Package | Version | Purpose |
@@ -148,6 +160,12 @@ ws-lua/
 | `mixed-line-ending` | LF enforced |
 | `stylua` | `stylua --check src/` |
 | `luacheck` | `luacheck src/ --no-unused-args` |
+
+```bash
+pre-commit run --all-files
+pre-commit run stylua --all-files
+pre-commit run luacheck --all-files
+```
 
 ---
 

@@ -1,5 +1,6 @@
 # ws-zig — primes-cli
 
+[![ws-zig CI](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-zig.yml/badge.svg?branch=main)](https://github.com/RelicFrog/ops-devbox-examples/actions/workflows/ci-ws-zig.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](../LICENSE)
 [![Zig](https://img.shields.io/badge/zig-0.14.1-F7A41D?logo=zig&logoColor=white)](https://ziglang.org)
 [![Devbox](https://img.shields.io/badge/devbox-ready-5C5CFF?logo=nixos&logoColor=white)](https://www.jetify.com/devbox)
@@ -197,6 +198,15 @@ Additional devbox-only targets:
 
 ## Devbox environment
 
+### Toolchain origin
+
+All tooling comes directly from the Nix store via devbox:
+
+```
+.devbox/nix/profile/default/bin/zig     ← Nix store (zig@0.14.1)
+.devbox/nix/profile/default/bin/zls     ← Nix store (zls@0.14.0)
+```
+
 ### macOS + Nix caveat
 
 Zig 0.14 on macOS with Nix detects the OS version as macOS 26 (Tahoe) from
@@ -234,6 +244,13 @@ issue does not occur and `zig build` (the build runner) works normally.
 | `curl` | 8.17.0 | HTTP client |
 | `pre-commit` | 4.5.1 | Git hook manager |
 
+### Environment variables
+
+| Variable | Value | Purpose |
+|----------|-------|---------|
+| `PATH` | `$PATH:$PWD/bin` | Adds `bin/primes-cli` auto-build wrapper |
+| `POWERLEVEL9K_INSTANT_PROMPT` | `quiet` | Suppress Powerlevel10k warning |
+
 ---
 
 ## Pre-commit hooks
@@ -253,6 +270,10 @@ devbox shell   # runs: pre-commit install --install-hooks
 | `mixed-line-ending` | pre-commit/pre-commit-hooks | LF line endings enforced |
 | `zig-fmt` | `zig fmt --check src/` | Code is formatted per Zig style rules |
 
+```bash
+pre-commit run --all-files
+pre-commit run zig-fmt --all-files
+```
 ```bash
 pre-commit run --all-files
 pre-commit run zig-fmt --all-files
