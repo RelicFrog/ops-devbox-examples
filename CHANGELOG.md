@@ -7,6 +7,70 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [1.1.0] — 2026-06-23
+
+### Added
+
+- `ws-go`: Go 1.24.13 workspace — `primes-cli` with `golangci-lint`, `gofumpt`,
+  `govulncheck`, race-detector tests, Dockerfile (golang:alpine → busybox:musl).
+- `ws-node`: Node.js 22 / TypeScript workspace — `primes-cli` with Biome formatter,
+  `tsx` test runner, `bin/primes-cli` wrapper, Dockerfile (node:22-alpine).
+- `ws-zig`: Zig 0.14.1 workspace — `primes-cli` with `comptime` Sieve of Eratosthenes
+  embedding 1000 primes in the binary at compile time; O(log N) lookup for nth/isPrime.
+- `ws-lua`: LuaJIT 2.1 workspace — `primes-cli` interpreted (no build step), `stylua`,
+  `luacheck`, inline test harness (72 tests), Dockerfile (alpine:3.21 + luajit).
+- `ws-python`: Python 3.13 workspace — `primes-cli` with all tooling (python, pytest,
+  ruff, mypy, uv) sourced directly from the Nix package store; no pip/venv/requirements.
+- `ws-k8s`: Kubernetes workspace — containerised `primes-cli` for all six languages,
+  deployed to local OrbStack cluster; `kubectl exec` wrappers for each language;
+  `bin/primes-{rust,go,node,zig,lua,python}` on PATH inside devbox shell.
+- Dockerfiles in each language workspace: multi-stage builds, all using `tail -f /dev/null`
+  keep-alive pattern for kubectl exec targets.
+- `make docker-build` / `make docker-run` targets in all language workspaces.
+- `make help` as `.DEFAULT_GOAL` with `awk`-generated output from `##` comments
+  in all workspaces.
+- `bin/primes-cli` PATH wrappers in all language workspaces (auto-build where needed).
+- `POWERLEVEL9K_INSTANT_PROMPT=quiet` in all `devbox.json` env blocks.
+- Pre-commit hooks in all language workspaces (file hygiene + language-specific hooks).
+- CI sub-workflows for ws-go, ws-node, ws-zig, ws-lua, ws-python registered in root CI.
+- Workspace READMEs with CI badges, CLI usage, pinned package tables, toolchain origin
+  sections, environment variable tables, pre-commit and CI pipeline documentation.
+- Root README: workspace table with per-workspace CI badges; full repository structure
+  tree; container images table; `ws-k8s` quick-start section.
+
+### Fixed
+
+- `ws-go`: Go 1.22.5 → 1.24.13, gofumpt 0.6.0 → 0.10.0, golangci-lint 1.59.1 → 1.64.8
+  to resolve `govulncheck` GO-2025-3750 vulnerability and toolchain compatibility.
+- `ws-go`: `CGO_ENABLED=1` override on CI test step — Go race detector requires CGO.
+- `ws-node`: `typescript` added as explicit `package.json` devDependency; `npm ci`
+  no longer silently fails on missing tsc.
+- `ws-node`: `useLiteralKeys` biome lint — `flags["to"]` → `flags.to`.
+- `ws-k8s`: namespace race condition — `kubectl apply -f dir/` applies all files
+  concurrently; fixed with dedicated `namespace` target + `kubectl wait --for=Active`.
+- `ws-k8s`: `tail -f /dev/null` replaces `sleep 3600` loop; `--grace-period=0 --force`
+  on teardown to avoid 30s hang.
+- `ws-k8s`: primes-rust runtime: `busybox:stable-musl` → `alpine:3.21` (musl libc
+  required for dynamically linked Rust binary).
+- `ws-python`: `PYTHONPATH=$PWD/src` added to `devbox.json` env so all `devbox run`
+  targets can resolve `import primes_cli` without manual configuration.
+- `ws-zig`: `build.zig` integration test path corrected from `tests/integration.zig`
+  to `src/integration_test.zig` after test restructure.
+- `ws-zig`: `PrimeError` error set extended with `OutOfMemory` to satisfy allocator
+  error contracts.
+- All workspace `dbx_init.sh`: removed `set -euo pipefail` — init hooks must not exit
+  non-zero or devbox shell startup is aborted.
+
+### Changed
+
+- `ws-k8s`: extended from 3 languages (rust/go/node) to 6 (+ zig/lua/python).
+- All workspace READMEs aligned to canonical structure: badges → ToC → Requirements
+  → Getting started → CLI usage → [highlight] → Project structure → Development tasks
+  → Devbox environment (toolchain origin + packages + env vars) → Pre-commit hooks
+  → CI pipeline → License.
+- Root `README.md`: Repository structure section fully updated with all 6 language
+  workspaces and all CI workflow files.
+
 ## [1.0.1] — 2026-06-22
 
 ### Added
@@ -22,25 +86,18 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
-- `ws-rust`: `RUSTC_WRAPPER=""` set in devbox env to prevent sccache errors when the
-  host shell has sccache configured but it is not installed inside the devbox environment.
-- `ws-rust`: `set -euo pipefail` removed from `dbx_init.sh` — init hooks must never
-  exit non-zero or shell startup is aborted.
-- `ws-rust`: All source files formatted with `cargo fmt` (Toolchain rustfmt) to match
-  CI behaviour; resolved divergence between Nix standalone rustfmt and cargo fmt.
-- `ws-rust`: `clippy::manual_is_multiple_of` — replaced `n % x == 0` with
-  `n.is_multiple_of(x)` per Rust 1.96 clippy lint.
+- `ws-rust`: `RUSTC_WRAPPER=""` set in devbox env to prevent sccache errors.
+- `ws-rust`: `set -euo pipefail` removed from `dbx_init.sh`.
+- `ws-rust`: All source files formatted with `cargo fmt` (Toolchain rustfmt).
+- `ws-rust`: `clippy::manual_is_multiple_of` — `n % x == 0` → `n.is_multiple_of(x)`.
 - `ws-rust`: `sieve_count_primes_below_100` test assertion corrected from 24 to 25.
 - All files: copyright year updated from 2024 to 2026.
 
 ### Changed
 
 - `ws-rust`: All devbox packages pinned to explicit versions (no `latest` tags).
-- `ws-rust`: `dbx_init.sh` v2 — OS override loaded before checks; rustfmt and
-  rust-analyzer moved to toolchain check block (they come from rustup, not Nix).
-- `ws-rust`: Removed redundant Nix packages `rustfmt@1.95.0` and `rust-analyzer@2026-06-01`
-  — both are provided by the rustup toolchain via `rust-toolchain.toml` components.
-  Pre-commit hooks are unaffected: they use `cargo fmt` (rustup proxy), not the Nix binary.
+- `ws-rust`: `dbx_init.sh` v2 — rustfmt and rust-analyzer moved to toolchain block.
+- `ws-rust`: Removed redundant Nix packages `rustfmt@1.95.0` and `rust-analyzer`.
 - `ws-rust`: `primes-cli` version bumped to 1.0.1.
 
 ## [0.1.0] — 2026-06-22
@@ -59,6 +116,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Community files: LICENSE (Apache-2.0), AUTHORS.md, CONTRIBUTING.md, SECURITY.md,
   CODE_OF_CONDUCT.md.
 
-[Unreleased]: https://github.com/RelicFrog/ops-devbox-examples/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/RelicFrog/ops-devbox-examples/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/RelicFrog/ops-devbox-examples/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/RelicFrog/ops-devbox-examples/compare/v0.1.0...v1.0.1
 [0.1.0]: https://github.com/RelicFrog/ops-devbox-examples/releases/tag/v0.1.0
