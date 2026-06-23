@@ -3,6 +3,7 @@
   "env": {
     "PYTHONDONTWRITEBYTECODE": "1",
     "PYTHONUNBUFFERED":        "1",
+    "PYTHONPATH":              "$PWD/src",
     "PATH":                   "$PATH:$PWD/bin",
     "C_DBX_META_TEAM":        "RelicFrog",
     "C_DBX_META_PROJECT_ID":  "ops-devbox-examples/ws-python",
