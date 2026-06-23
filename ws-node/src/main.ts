@@ -98,7 +98,7 @@ function runCheck(args: string[]): void {
 
 function runList(args: string[]): void {
   const flags = parseFlags(args);
-  const toStr = flags["to"];
+  const toStr = flags.to;
 
   if (!toStr) {
     console.error("Usage: primes-cli list --to <N>");
@@ -115,8 +115,8 @@ function runList(args: string[]): void {
 
 function runRange(args: string[]): void {
   const flags = parseFlags(args);
-  const fromStr = flags["from"];
-  const toStr = flags["to"];
+  const fromStr = flags.from;
+  const toStr = flags.to;
 
   if (!toStr) {
     console.error("Usage: primes-cli range --from <A> --to <B>");
