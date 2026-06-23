@@ -55,6 +55,15 @@ devbox shell
 The init hook (`scripts/devbox/dbx_init.sh`) runs automatically on shell entry
 and displays a preflight status matrix for all toolchain components.
 
+After shell entry, `primes-cli` is directly available on `PATH` via
+`bin/primes-cli` — a shell wrapper that invokes `tsx src/main.ts`. No build
+step required.
+
+```bash
+primes-cli --help
+primes-cli list --to 20
+```
+
 ---
 
 ## CLI usage
@@ -107,6 +116,9 @@ ws-node/
 ├── tsconfig.json                   # TypeScript compiler configuration (strict)
 ├── biome.json                      # Biome formatter + linter configuration
 ├── package.json                    # npm metadata + @types/node devDependency
+├── bin/
+│   └── primes-cli                  # Shell wrapper: exec tsx src/main.ts "$@"
+│                                   # Added to PATH via devbox.json env (no build needed)
 ├── src/
 │   ├── primes.ts                   # Core algorithms (isPrime, sieve, range, nth)
 │   ├── primes.test.ts              # Unit tests — node:test built-in (25 tests)
@@ -168,6 +180,15 @@ required for the development toolchain:
 The only npm dependency is `@types/node` (type declarations for TypeScript),
 installed locally for IDE and compiler support. There are **zero production
 runtime dependencies**.
+
+### Environment variables
+
+| Variable | Value | Purpose |
+|----------|-------|---------|
+| `NODE_ENV` | `development` | Standard Node.js environment mode |
+| `NODE_NO_WARNINGS` | `1` | Suppress Node.js experimental feature warnings |
+| `PATH` | `$PATH:$PWD/bin` | Adds `bin/primes-cli` wrapper to shell PATH |
+| `POWERLEVEL9K_INSTANT_PROMPT` | `quiet` | Suppress Powerlevel10k console-I/O warning during zsh init |
 
 ### Pinned packages
 

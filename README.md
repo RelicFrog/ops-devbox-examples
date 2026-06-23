@@ -70,8 +70,22 @@ ops-devbox-examples/
 │   ├── src/                    # primes-cli source
 │   ├── tests/                  # Integration tests
 │   └── scripts/devbox/         # Init hook, preflight checks, OS overrides
-├── ws-go/                      # Go workspace (planned)
-├── ws-node/                    # Node.js workspace (planned)
+├── ws-go/                      # Go 1.24 workspace (active)
+│   ├── devbox.json             # Pinned Nix packages (go, gofumpt, golangci-lint, …)
+│   ├── Makefile                # Build targets via gnumake
+│   ├── go.mod                  # Module: github.com/RelicFrog/ops-devbox-examples/ws-go
+│   ├── src/                    # primes-cli source (package primes + cmd/)
+│   ├── tests/                  # Integration tests
+│   └── scripts/devbox/         # Init hook, preflight checks, OS overrides
+├── ws-node/                    # Node.js 22 / TypeScript workspace (active)
+│   ├── devbox.json             # Pinned Nix packages (nodejs, typescript, tsx, biome, …)
+│   ├── Makefile                # Build targets via gnumake
+│   ├── tsconfig.json           # Strict TypeScript configuration
+│   ├── biome.json              # Formatter + linter configuration
+│   ├── bin/primes-cli          # Shell wrapper — runs tsx src/main.ts directly
+│   ├── src/                    # primes-cli source (primes.ts + main.ts)
+│   ├── tests/                  # Integration tests
+│   └── scripts/devbox/         # Init hook, preflight checks, OS overrides
 ├── LICENSE                     # Apache-2.0
 └── README.md
 ```

@@ -168,6 +168,7 @@ Unlike the Rust workspace (which uses a rustup proxy), Go tooling is provided
 | `CGO_ENABLED` | `0` | Disable cgo — pure Go builds, no C toolchain needed |
 | `GOPATH` | `$PWD/.devbox/go` | Workspace-local Go module cache |
 | `GOBIN` | `$PWD/.devbox/go/bin` | Workspace-local installed binaries |
+| `POWERLEVEL9K_INSTANT_PROMPT` | `quiet` | Suppress Powerlevel10k console-I/O warning during zsh init |
 
 ### Pinned packages
 

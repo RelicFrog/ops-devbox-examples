@@ -168,12 +168,23 @@ All packages are pinned to explicit versions. No `latest` tags.
 | `git` | 2.54.0 | Version control |
 | `gh` | 2.52.0 | GitHub CLI |
 | `gitleaks` | 8.30.1 | Secret detection |
+| `glow` | 2.1.2 | Terminal Markdown renderer (`devbox run docs`) |
 | `ripgrep` | 14.1.0 | Fast grep |
 | `fd` | 10.4.2 | Fast find |
 | `bat` | 0.24.0 | Syntax-highlighted cat |
 | `jq` | 1.8.1 | JSON processor |
 | `curl` | 8.17.0 | HTTP client |
 | `mold` | 2.41.0 | Fast linker (**Linux only** — platform-excluded on macOS) |
+
+### Environment variables
+
+| Variable | Value | Purpose |
+|----------|-------|---------|
+| `RUST_BACKTRACE` | `1` | Full backtraces on panic |
+| `CARGO_TERM_COLOR` | `always` | Force coloured cargo output |
+| `CARGO_INCREMENTAL` | `0` | Disable incremental compilation (reproducible builds) |
+| `RUSTC_WRAPPER` | `""` | Explicitly unset to prevent sccache interference from host shell |
+| `POWERLEVEL9K_INSTANT_PROMPT` | `quiet` | Suppress Powerlevel10k console-I/O warning during zsh init |
 
 ### Platform package exclusion
 
