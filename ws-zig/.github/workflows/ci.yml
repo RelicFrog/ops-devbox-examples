@@ -35,14 +35,10 @@ jobs:
         os: [ubuntu-latest, macos-latest]
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Zig
-        uses: mlugg/setup-zig@v2
+      - uses: actions/checkout@v4
+      - uses: mlugg/setup-zig@v2
         with:
           version: ${{ env.ZIG_VERSION }}
-
       - name: Format check
         run: zig fmt --check src/
 
@@ -56,16 +52,31 @@ jobs:
         os: [ubuntu-latest, macos-latest]
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Zig
-        uses: mlugg/setup-zig@v2
+      - uses: actions/checkout@v4
+      - uses: mlugg/setup-zig@v2
         with:
           version: ${{ env.ZIG_VERSION }}
 
-      - name: Build
+      - name: Build (Linux)
+        if: runner.os == 'Linux'
         run: zig build -Doptimize=ReleaseSafe
 
-      - name: Test
+      - name: Test (Linux)
+        if: runner.os == 'Linux'
         run: zig build test
+
+      - name: Build (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          mkdir -p zig-out/bin
+          zig build-exe src/main.zig \
+            -O ReleaseSafe \
+            -target aarch64-macos.15.0 \
+            -lc \
+            -femit-bin=zig-out/bin/primes-cli
+
+      - name: Test (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          zig test src/primes.zig -target aarch64-macos.15.0 -lc
+          zig test src/integration_test.zig -target aarch64-macos.15.0 -lc

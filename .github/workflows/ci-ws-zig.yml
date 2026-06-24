@@ -2,6 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # .github/workflows/ci-ws-zig.yml — reusable wrapper for ws-zig.
+#
+# Note on macOS: zig build (the build runner) fails on macOS + GitHub Actions
+# because zig 0.14 detects macOS 26 but the SDK is for macOS 15.
+# Fix: use 'zig build-exe' and 'zig test' directly on macOS with
+# -target aarch64-macos.15.0, same as the local Makefile workaround.
+# On Linux, 'zig build' works without additional flags.
 
 name: ws-zig (reusable)
 
@@ -46,7 +52,31 @@ jobs:
       - uses: mlugg/setup-zig@v2
         with:
           version: ${{ env.ZIG_VERSION }}
-      - name: Build
+
+      # Linux: zig build works without SDK workaround
+      - name: Build (Linux)
+        if: runner.os == 'Linux'
         run: zig build -Doptimize=ReleaseSafe
-      - name: Test
+
+      - name: Test (Linux)
+        if: runner.os == 'Linux'
         run: zig build test
+
+      # macOS: zig build runner links against macOS SDK symbols that are
+      # unavailable via setup-zig. Use direct zig build-exe / zig test
+      # with explicit target to pin against macOS 15 SDK.
+      - name: Build (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          mkdir -p zig-out/bin
+          zig build-exe src/main.zig \
+            -O ReleaseSafe \
+            -target aarch64-macos.15.0 \
+            -lc \
+            -femit-bin=zig-out/bin/primes-cli
+
+      - name: Test (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          zig test src/primes.zig -target aarch64-macos.15.0 -lc
+          zig test src/integration_test.zig -target aarch64-macos.15.0 -lc
