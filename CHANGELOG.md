@@ -7,30 +7,31 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-## [1.0.2] — 2026-06-23
+## [1.2.0] — 2026-06-23
 
 ### Added
 
 - `make info` target in all six language workspaces — shows tool versions,
   Nix origin check ("From Nix? yes/no"), and platform in a consistent
-  styled format with dividers.
+  styled format with section dividers.
 - `ws-rust`: `bin/primes-cli` wrapper and `PATH=$PWD/bin` in `devbox.json`
-  so `primes-cli` is directly callable inside `devbox shell` (was missing).
+  so `primes-cli` is directly callable inside `devbox shell`.
 
 ### Fixed
 
-- `ws-go`, `ws-lua`: missing `PATH=$PATH:$PWD/bin` in `devbox.json` — 
-  `primes-cli` required explicit `bin/primes-cli` prefix; now callable directly.
-- `ws-zig` CI: `macos-latest` runners upgraded to macOS 26 arm64 — Zig 0.14.1
-  build runner fails with undefined symbols against macOS 26 SDK. Split CI steps:
+- `ws-go`, `ws-lua`: missing `PATH=$PATH:$PWD/bin` in `devbox.json` —
+  `primes-cli` required explicit `bin/primes-cli` prefix; now callable directly
+  in all six workspaces without path prefix.
+- `ws-zig` CI: `macos-latest` upgraded to macOS 26 arm64 — Zig 0.14.1 build
+  runner fails with undefined symbols against macOS 26 SDK. Split CI steps:
   Linux uses `zig build`, macOS uses direct `zig build-exe` / `zig test` with
-  `-target aarch64-macos.15.0` (same workaround as local Makefile).
-- `ws-zig` Dockerfile: `ghcr.io/euantorano/zig:0.13.0` no longer exists —
+  `-target aarch64-macos.15.0`.
+- `ws-zig` Dockerfile: `ghcr.io/euantorano/zig:0.13.0` no longer accessible —
   replaced with `debian:bookworm-slim` + direct download from `ziglang.org`.
-- `make info` all workspaces: tool version fields were empty (generated target
-  used `$(cmd)` instead of `$$(cmd)` — make expanded at parse time). Fixed via
-  heredoc rewrite. Also fixed: `luajit -v` writes to stderr (needs `2>&1`),
-  `awk $1` variables need `$$1` escaping in make recipes.
+- `make info` all workspaces: tool version fields were empty due to `$(cmd)`
+  instead of `$$(cmd)` in make recipes (expanded at parse time, not runtime).
+  Also fixed: `luajit -v` writes to stderr (needs `2>&1`); `awk $1` inside make
+  recipes requires `$$1` escaping.
 
 ## [1.1.0] — 2026-06-23
 
@@ -49,11 +50,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - `ws-k8s`: Kubernetes workspace — containerised `primes-cli` for all six languages,
   deployed to local OrbStack cluster; `kubectl exec` wrappers for each language;
   `bin/primes-{rust,go,node,zig,lua,python}` on PATH inside devbox shell.
-- Dockerfiles in each language workspace: multi-stage builds, all using `tail -f /dev/null`
+- Dockerfiles in each language workspace: multi-stage builds, `tail -f /dev/null`
   keep-alive pattern for kubectl exec targets.
 - `make docker-build` / `make docker-run` targets in all language workspaces.
-- `make help` as `.DEFAULT_GOAL` with `awk`-generated output from `##` comments
-  in all workspaces.
+- `make help` as `.DEFAULT_GOAL` with `awk`-generated output in all workspaces.
 - `bin/primes-cli` PATH wrappers in all language workspaces (auto-build where needed).
 - `POWERLEVEL9K_INSTANT_PROMPT=quiet` in all `devbox.json` env blocks.
 - Pre-commit hooks in all language workspaces (file hygiene + language-specific hooks).
@@ -68,33 +68,20 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - `ws-go`: Go 1.22.5 → 1.24.13, gofumpt 0.6.0 → 0.10.0, golangci-lint 1.59.1 → 1.64.8
   to resolve `govulncheck` GO-2025-3750 vulnerability and toolchain compatibility.
 - `ws-go`: `CGO_ENABLED=1` override on CI test step — Go race detector requires CGO.
-- `ws-node`: `typescript` added as explicit `package.json` devDependency; `npm ci`
-  no longer silently fails on missing tsc.
+- `ws-node`: `typescript` added as explicit `package.json` devDependency.
 - `ws-node`: `useLiteralKeys` biome lint — `flags["to"]` → `flags.to`.
-- `ws-k8s`: namespace race condition — `kubectl apply -f dir/` applies all files
-  concurrently; fixed with dedicated `namespace` target + `kubectl wait --for=Active`.
-- `ws-k8s`: `tail -f /dev/null` replaces `sleep 3600` loop; `--grace-period=0 --force`
+- `ws-k8s`: namespace race condition fixed with dedicated `namespace` target.
+- `ws-k8s`: `tail -f /dev/null` replaces `sleep 3600`; `--grace-period=0 --force`
   on teardown to avoid 30s hang.
-- `ws-k8s`: primes-rust runtime: `busybox:stable-musl` → `alpine:3.21` (musl libc
-  required for dynamically linked Rust binary).
-- `ws-python`: `PYTHONPATH=$PWD/src` added to `devbox.json` env so all `devbox run`
-  targets can resolve `import primes_cli` without manual configuration.
-- `ws-zig`: `build.zig` integration test path corrected from `tests/integration.zig`
-  to `src/integration_test.zig` after test restructure.
-- `ws-zig`: `PrimeError` error set extended with `OutOfMemory` to satisfy allocator
-  error contracts.
-- All workspace `dbx_init.sh`: removed `set -euo pipefail` — init hooks must not exit
-  non-zero or devbox shell startup is aborted.
+- `ws-k8s`: primes-rust runtime: `busybox:stable-musl` → `alpine:3.21`.
+- `ws-python`: `PYTHONPATH=$PWD/src` added to `devbox.json` env.
+- `ws-zig`: `build.zig` integration test path corrected.
 
 ### Changed
 
 - `ws-k8s`: extended from 3 languages (rust/go/node) to 6 (+ zig/lua/python).
-- All workspace READMEs aligned to canonical structure: badges → ToC → Requirements
-  → Getting started → CLI usage → [highlight] → Project structure → Development tasks
-  → Devbox environment (toolchain origin + packages + env vars) → Pre-commit hooks
-  → CI pipeline → License.
-- Root `README.md`: Repository structure section fully updated with all 6 language
-  workspaces and all CI workflow files.
+- All workspace READMEs aligned to canonical structure.
+- Root `README.md`: Repository structure fully updated.
 
 ## [1.0.1] — 2026-06-22
 
@@ -141,8 +128,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Community files: LICENSE (Apache-2.0), AUTHORS.md, CONTRIBUTING.md, SECURITY.md,
   CODE_OF_CONDUCT.md.
 
-[Unreleased]: https://github.com/RelicFrog/ops-devbox-examples/compare/v1.0.2...HEAD
-[1.0.2]: https://github.com/RelicFrog/ops-devbox-examples/compare/v1.1.0...v1.0.2
+[Unreleased]: https://github.com/RelicFrog/ops-devbox-examples/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/RelicFrog/ops-devbox-examples/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/RelicFrog/ops-devbox-examples/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/RelicFrog/ops-devbox-examples/compare/v0.1.0...v1.0.1
 [0.1.0]: https://github.com/RelicFrog/ops-devbox-examples/releases/tag/v0.1.0
