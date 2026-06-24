@@ -93,16 +93,17 @@ info: ## print workspace tool versions and Nix/rustup toolchain path
 	@printf '  \033[90m%s\033[0m\n' "$$(printf '%.0s─' {1..48})"
 	@printf '  %-14s %s\n'  "rustc"    "$$(rustc --version 2>/dev/null || echo 'n/a')"
 	@printf '  %-14s %s\n'  "cargo"    "$$(cargo --version 2>/dev/null || echo 'n/a')"
-	@printf '  %-14s '; \
-	  if which rustc 2>/dev/null | grep -q virtenv; then \
-	    printf '\033[32mrustup virtenv\033[0m\n'; \
+	@printf '  %-14s ' "Toolchain?"; \
+	  _p=$$(rustc --print sysroot 2>/dev/null); \
+	  if echo "$$_p" | grep -q "\.devbox"; then \
+	    printf '\033[32mdevbox virtenv\033[0m\n'; \
 	  else \
-	    printf '\033[33mnot in devbox virtenv\033[0m\n'; \
+	    printf '\033[33mexternal: %s\033[0m\n' "$$_p"; \
 	  fi
 	@printf '  \033[90m%s\033[0m\n' "$$(printf '%.0s─' {1..48})"
-	@printf '  %-14s %s\n'  "rustfmt"  "$$(rustfmt --version 2>/dev/null || echo 'n/a')"
-	@printf '  %-14s %s\n'  "clippy"   "$$(cargo clippy --version 2>/dev/null || echo 'n/a')"
-	@printf '  %-14s %s\n'  "nextest"  "$$(cargo nextest --version 2>/dev/null || echo 'n/a')"
+	@printf '  %-14s %s\n'  "rustfmt"  "$$(rustfmt --version 2>/dev/null | head -1 || echo 'n/a')"
+	@printf '  %-14s %s\n'  "clippy"   "$$(cargo clippy --version 2>/dev/null | head -1 || echo 'n/a')"
+	@printf '  %-14s %s\n'  "nextest"  "$$(cargo nextest --version 2>/dev/null | head -1 || echo 'n/a')"
 	@printf '  \033[90m%s\033[0m\n' "$$(printf '%.0s─' {1..48})"
 	@printf '  %-14s %s\n'  "make"     "$$(make --version 2>/dev/null | head -1 || echo 'n/a')"
 	@printf '  %-14s %s\n'  "git"      "$$(git --version 2>/dev/null || echo 'n/a')"

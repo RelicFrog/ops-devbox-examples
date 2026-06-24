@@ -92,11 +92,12 @@ docker-run: ## docker run — smoke test the container image
 	docker run --rm $(IMG) check 97
 	docker run --rm $(IMG) nth 10
 
+
 info: ## print workspace tool versions and Nix toolchain path
 	@printf '\n'
 	@printf '  \033[1m\033[34mws-go — devbox workspace info\033[0m\n'
 	@printf '  \033[90m%s\033[0m\n' "$$(printf '%.0s─' {1..48})"
-	@printf '  %-14s %s\n'  "go"  "$(go version 2>/dev/null || echo 'n/a')"
+	@printf '  %-14s %s\n'  "go"         "$$(go version 2>/dev/null || echo 'n/a')"
 	@printf '  %-14s ' "From Nix?"; \
 	  if which go 2>/dev/null | grep -q nix; then \
 	    printf '\033[32myes\033[0m\n'; \
@@ -104,11 +105,11 @@ info: ## print workspace tool versions and Nix toolchain path
 	    printf '\033[33mno (outside devbox shell)\033[0m\n'; \
 	  fi
 	@printf '  \033[90m%s\033[0m\n' "$$(printf '%.0s─' {1..48})"
-	@printf '  %-14s %s\n'  "gofumpt"  "$(gofumpt --version 2>/dev/null || echo 'n/a')"
-	@printf '  %-14s %s\n'  "golangci"  "$(golangci-lint --version 2>/dev/null | head -1 || echo 'n/a')"
-	@printf '  %-14s %s\n'  "govulncheck"  "$(govulncheck --version 2>/dev/null | head -1 || echo 'n/a')"
+	@printf '  %-14s %s\n'  "gofumpt"    "$$(gofumpt --version 2>/dev/null || echo 'n/a')"
+	@printf '  %-14s %s\n'  "golangci"   "$$(golangci-lint --version 2>/dev/null | head -1 | cut -d' ' -f4 || echo 'n/a')"
+	@printf '  %-14s %s\n'  "govulncheck" "$$(govulncheck --version 2>/dev/null | grep 'vulncheck' | awk '{print $$2}' || echo 'n/a')"
 	@printf '  \033[90m%s\033[0m\n' "$$(printf '%.0s─' {1..48})"
-	@printf '  %-14s %s\n'  "make"     "$$(make --version 2>/dev/null | head -1 || echo 'n/a')"
-	@printf '  %-14s %s\n'  "git"      "$$(git --version 2>/dev/null || echo 'n/a')"
-	@printf '  %-14s %s\n'  "platform" "$$(uname -ms)"
+	@printf '  %-14s %s\n'  "make"       "$$(make --version 2>/dev/null | head -1 || echo 'n/a')"
+	@printf '  %-14s %s\n'  "git"        "$$(git --version 2>/dev/null || echo 'n/a')"
+	@printf '  %-14s %s\n'  "platform"   "$$(uname -ms)"
 	@printf '\n'
