@@ -7,6 +7,31 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [1.0.2] — 2026-06-23
+
+### Added
+
+- `make info` target in all six language workspaces — shows tool versions,
+  Nix origin check ("From Nix? yes/no"), and platform in a consistent
+  styled format with dividers.
+- `ws-rust`: `bin/primes-cli` wrapper and `PATH=$PWD/bin` in `devbox.json`
+  so `primes-cli` is directly callable inside `devbox shell` (was missing).
+
+### Fixed
+
+- `ws-go`, `ws-lua`: missing `PATH=$PATH:$PWD/bin` in `devbox.json` — 
+  `primes-cli` required explicit `bin/primes-cli` prefix; now callable directly.
+- `ws-zig` CI: `macos-latest` runners upgraded to macOS 26 arm64 — Zig 0.14.1
+  build runner fails with undefined symbols against macOS 26 SDK. Split CI steps:
+  Linux uses `zig build`, macOS uses direct `zig build-exe` / `zig test` with
+  `-target aarch64-macos.15.0` (same workaround as local Makefile).
+- `ws-zig` Dockerfile: `ghcr.io/euantorano/zig:0.13.0` no longer exists —
+  replaced with `debian:bookworm-slim` + direct download from `ziglang.org`.
+- `make info` all workspaces: tool version fields were empty (generated target
+  used `$(cmd)` instead of `$$(cmd)` — make expanded at parse time). Fixed via
+  heredoc rewrite. Also fixed: `luajit -v` writes to stderr (needs `2>&1`),
+  `awk $1` variables need `$$1` escaping in make recipes.
+
 ## [1.1.0] — 2026-06-23
 
 ### Added
@@ -116,7 +141,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Community files: LICENSE (Apache-2.0), AUTHORS.md, CONTRIBUTING.md, SECURITY.md,
   CODE_OF_CONDUCT.md.
 
-[Unreleased]: https://github.com/RelicFrog/ops-devbox-examples/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/RelicFrog/ops-devbox-examples/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/RelicFrog/ops-devbox-examples/compare/v1.1.0...v1.0.2
 [1.1.0]: https://github.com/RelicFrog/ops-devbox-examples/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/RelicFrog/ops-devbox-examples/compare/v0.1.0...v1.0.1
 [0.1.0]: https://github.com/RelicFrog/ops-devbox-examples/releases/tag/v0.1.0
