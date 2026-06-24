@@ -4,6 +4,7 @@
     "CGO_ENABLED": "0",
     "GOPATH": "$PWD/.devbox/go",
     "GOBIN": "$PWD/.devbox/go/bin",
+    "PATH": "$PATH:$PWD/bin",
     "C_DBX_META_TEAM": "RelicFrog",
     "C_DBX_META_PROJECT_ID": "ops-devbox-examples/ws-go",
     "C_DBX_META_VERSION": "1",

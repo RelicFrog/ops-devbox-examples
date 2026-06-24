@@ -4,6 +4,7 @@
     "C_DBX_META_TEAM":             "RelicFrog",
     "C_DBX_META_PROJECT_ID":       "ops-devbox-examples/ws-lua",
     "C_DBX_META_VERSION":          "1",
+    "PATH":                        "$PATH:$PWD/bin",
     "POWERLEVEL9K_INSTANT_PROMPT": "quiet"
   },
   "shell": {
